@@ -5,8 +5,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -30,10 +32,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.approagency.drug.data.dto.DrugDetail
+import com.approagency.drug.data.dto.DrugListResponse
 import com.approagency.drug.domain.model.DrugSearchParams
+import com.approagency.drug.presentation.common.CustomModalDialog
+import com.approagency.drug.presentation.common.Loading
 import com.approagency.drug.presentation.common.PrimaryButton
 import com.approagency.drug.presentation.viewModel.DrugSearchState
 import com.approagency.drug.presentation.viewModel.HomeViewModel
+import com.vada.caller.ui.theme.dime
 import org.koin.androidx.compose.koinViewModel
 
 
@@ -44,6 +51,7 @@ fun HomeScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     HomeContent(
+        modifier = modifier,
         state = state,
         onSearch = { value -> viewModel.searchDrugs(DrugSearchParams(query = value)) },
         onRetry = {
@@ -93,10 +101,10 @@ fun HomeContent(
                     }
                 )
             }
+            Spacer(modifier = Modifier.height(MaterialTheme.dime.xs))
             PrimaryButton(
                 text = "جستجو",
-                height = 40,
-
+                height = 45,
                 isLoading = state.isLoading,
                 onClick = {
                     if (search.isNotBlank()) {
@@ -104,6 +112,87 @@ fun HomeContent(
                     }
                 }
             )
+
+            when {
+                state.isLoading ->{
+                    CustomModalDialog(
+                        onDismissRequest = {
+
+                        },
+                        content = {
+                            Column {
+                                Loading()
+                                Text("در حال جستجو...")
+                            }
+                        }
+                    )
+                }
+                state.drugsData != null ->{
+                    DrugListContent(
+                        drugsData = state.drugsData,
+                        onDrugClick = onDrugClick
+                    )
+                }else -> {
+                EmptyStateContent()
+            }
+            }
         }
+    }
+}
+
+
+@Composable
+fun DrugListContent(
+    drugsData: Result<DrugListResponse?>?,
+    onDrugClick: (String) -> Unit
+) {
+    val drugs = drugsData?.getOrNull()?.data ?: emptyList()
+
+    if (drugs.isEmpty()) {
+        Text(
+            text = "نتیجه‌ای یافت نشد",
+            modifier = Modifier.padding(16.dp)
+        )
+    } else {
+        // Display drug list
+        Column {
+            drugs.forEach { drug ->
+                DrugItem(
+                    drug = drug,
+                    onClick = { onDrugClick(drug.cod.toString()) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun DrugItem(
+    drug: DrugDetail, // Adjust this based on your actual data class
+    onClick: () -> Unit
+) {
+Row() {
+    Text(drug.nam_fa.toString())
+}
+//    Button(
+//        onClick = onClick,
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .padding(vertical = 4.dp)
+//    ) {
+//        drug.nam_fa?.let { Text(text = it) } // Adjust based on your drug model
+//    }
+}
+
+@Composable
+fun EmptyStateContent() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "برای جستجو، نام دارو را وارد کنید",
+            modifier = Modifier.padding(32.dp)
+        )
     }
 }

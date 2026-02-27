@@ -29,7 +29,8 @@ fun PrimaryButton(
         },
     ) {
         if (isLoading == true) {
-            Loading()
+            Loading(
+            )
         } else {
             Text(text)
         }
