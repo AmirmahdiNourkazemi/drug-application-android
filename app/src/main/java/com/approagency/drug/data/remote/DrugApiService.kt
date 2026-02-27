@@ -7,7 +7,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface DrugApiService {
-    @GET("/drugs/search")
+    @GET("drugs/search")
     suspend fun getDrugs(
         @Query("q")query: String?,
         @Query("per_page")perPage:Int? = 20,
@@ -17,7 +17,7 @@ interface DrugApiService {
     ): DrugListResponse
 
 
-    @GET("/drugs/{cod}")
+    @GET("drugs/{cod}")
     suspend fun getDrugDetail(
         @Path("cod") cod: Int
     ): DrugModels

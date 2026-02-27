@@ -2,6 +2,7 @@ package com.approagency.drug.di
 
 
 import android.app.Application
+import com.approagency.drug.data.remote.DrugApiService
 import com.approagency.drug.data.repository.DrugRepositoryImpl
 import com.approagency.drug.domain.repository.DrugRepository
 import com.approagency.drug.domain.usecase.GetDrugSearchUseCase
@@ -19,7 +20,9 @@ val appModule= module {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
-
+    single<DrugApiService> {
+        get<Retrofit>().create(DrugApiService::class.java)
+    }
 
     //repo
     single<DrugRepository> {
@@ -34,6 +37,7 @@ val appModule= module {
     }
 
     //view model
-    viewModel { (app: Application) ->
-        HomeViewModel(app, get())}
+    viewModel {
+        HomeViewModel(get())
+    }
 }
