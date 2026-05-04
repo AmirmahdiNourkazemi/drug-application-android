@@ -1,5 +1,6 @@
 pluginManagement {
     repositories {
+        maven { url = uri("https://maven.myket.ir") }
         google {
             content {
                 includeGroupByRegex("com\\.android.*")
@@ -7,15 +8,16 @@ pluginManagement {
                 includeGroupByRegex("androidx.*")
             }
         }
-        mavenCentral()
-        gradlePluginPortal()
+     //   mavenCentral()
+     //   gradlePluginPortal()
     }
 }
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        google()
-        mavenCentral()
+        //google()
+        //mavenCentral()
+        maven { url = uri("https://maven.myket.ir") }
     }
 }
 

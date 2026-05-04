@@ -5,6 +5,8 @@ import android.app.Application
 import com.approagency.drug.data.remote.DrugApiService
 import com.approagency.drug.data.repository.DrugRepositoryImpl
 import com.approagency.drug.domain.repository.DrugRepository
+import com.approagency.drug.domain.usecase.GetDarmanUseCase
+import com.approagency.drug.domain.usecase.GetDrugDetailUseCase
 import com.approagency.drug.domain.usecase.GetDrugSearchUseCase
 import com.approagency.drug.presentation.viewModel.HomeViewModel
 import com.approagency.drug.utils.Config
@@ -34,10 +36,19 @@ val appModule= module {
     //UseCase
     single {
         GetDrugSearchUseCase(get())
+
+    }
+
+    single{
+        GetDrugDetailUseCase(get())
+    }
+
+    single {
+        GetDarmanUseCase(get())
     }
 
     //view model
     viewModel {
-        HomeViewModel(get())
+        HomeViewModel(get() , get() , get())
     }
 }

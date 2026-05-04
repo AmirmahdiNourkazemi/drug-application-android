@@ -1,5 +1,6 @@
 package com.approagency.drug.data.remote
 
+import com.approagency.drug.data.dto.DarmanModel
 import com.approagency.drug.data.dto.DrugListResponse
 import com.approagency.drug.data.dto.DrugModels
 import retrofit2.http.GET
@@ -21,4 +22,8 @@ interface DrugApiService {
     suspend fun getDrugDetail(
         @Path("cod") cod: Int
     ): DrugModels
+
+
+    @GET("drugs/goroh-darmani")
+    suspend fun getGorohDaroei(): DarmanModel
 }

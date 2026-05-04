@@ -24,7 +24,6 @@ fun CustomModalDialog(
     ){
         Surface(
             modifier = modifier
-                .fillMaxWidth()
                 .wrapContentHeight(),
             shape = MaterialTheme.shapes.medium,
             color = MaterialTheme.colorScheme.surface,

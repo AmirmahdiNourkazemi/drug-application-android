@@ -1,5 +1,6 @@
 package com.approagency.drug.presentation.common
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
@@ -8,6 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -29,8 +31,7 @@ fun PrimaryButton(
         },
     ) {
         if (isLoading == true) {
-            Loading(
-            )
+          Text("... در حال جستجو" , textAlign = TextAlign.Right)
         } else {
             Text(text)
         }
