@@ -80,7 +80,7 @@ fun RootScreen(navHostController: NavHostController, modifier: Modifier){
                 containerColor = MaterialTheme.colorScheme.surface,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(110.dp).padding(bottom = 2.dp).clip(MaterialTheme.shapes.extraLarge), // 👈 کوچیک‌تر از حالت پیش‌فرض
+                    .height(110.dp).padding(bottom = 2.dp).clip(MaterialTheme.shapes.extraLarge),
                 tonalElevation = 8.dp, // subtle shadow
                 windowInsets = WindowInsets.navigationBars
                     .only(WindowInsetsSides.Bottom)
@@ -114,7 +114,7 @@ fun RootScreen(navHostController: NavHostController, modifier: Modifier){
                             )
                         },
 
-                        alwaysShowLabel = true // 👈 فقط وقتی select شد label نشون بده
+                        alwaysShowLabel = true
                     )
                 }
             }
