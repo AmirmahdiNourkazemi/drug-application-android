@@ -69,14 +69,12 @@ fun RootScreen(navHostController: NavHostController, modifier: Modifier){
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
                 title = {
-                    Text("جستجوی دارویی" , textAlign = TextAlign.Right , style = MaterialTheme.typography.titleLarge , fontWeight = FontWeight.W700 )
+                    Text("دستیار سلامت" , textAlign = TextAlign.Right , style = MaterialTheme.typography.titleLarge , fontWeight = FontWeight.W700 )
                 }
             )
         }},
-//        modifier = modifier.fillMaxSize(),
         bottomBar = {
             NavigationBar(
-
                 containerColor = MaterialTheme.colorScheme.surface,
                 modifier = Modifier
                     .fillMaxWidth()

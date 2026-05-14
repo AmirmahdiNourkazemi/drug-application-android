@@ -5,6 +5,7 @@ import com.approagency.drug.data.local.dao.TestItemDao
 import com.approagency.drug.data.local.entities.TestGroupEntity
 import com.approagency.drug.data.local.entities.TestItemEntity
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 
 class LabRepositoryImpl (
     private val testGroupDao: TestGroupDao,
@@ -21,4 +22,14 @@ class LabRepositoryImpl (
     fun getItemsByGroupId(groupId: Int): Flow<List<TestItemEntity>> = testItemDao.getItemsByGroupId(groupId)
     suspend fun getItemById(itemId: Int): TestItemEntity? = testItemDao.getItemById(itemId)
     fun searchTestItems(query: String): Flow<List<TestItemEntity>> = testItemDao.searchTestItems(query)
+
+
+    fun searchGroupsAndItems(searchQuery: String): Flow<Pair<List<TestGroupEntity>, List<TestItemEntity>>> {
+        return combine(
+            testGroupDao.searchGroups(searchQuery),
+            testItemDao.searchTestItems(searchQuery)
+        ) { groups, items ->
+            Pair(groups, items)
+        }
+    }
 }

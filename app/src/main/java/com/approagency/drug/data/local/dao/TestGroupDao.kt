@@ -29,4 +29,18 @@ interface TestGroupDao {
 
     @Query("DELETE FROM testGroup")
     suspend fun deleteAllGroups()
+
+    @Query("""
+        SELECT * FROM testGroup 
+        WHERE Fname LIKE '%' || :query || '%' 
+           OR Ename LIKE '%' || :query || '%' 
+           OR Detail LIKE '%' || :query || '%'
+        ORDER BY 
+            CASE 
+                WHEN Fname LIKE '%' || :query || '%' THEN 1
+                WHEN Ename LIKE '%' || :query || '%' THEN 2
+                ELSE 3
+            END
+    """)
+    fun searchGroups(query: String): Flow<List<TestGroupEntity>>
 }

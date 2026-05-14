@@ -43,40 +43,15 @@ fun DarmanContent(
 ){
     val drugs = darmanData?.getOrNull()?.data ?: emptyList()
     if (drugs.isEmpty()){
-        CustomBox(
-            child = {
-                Column {
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(all = MaterialTheme.dime.sm),
-                    ) {
-                        Text(
-                            text = "مشکل در دریافت اطلاعات",
-                            fontWeight = FontWeight.W500
-                        )
-                        Spacer(modifier = Modifier.width(MaterialTheme.dime.xs))
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Search"
-                        )
-                    }
-                    PrimaryButton(
-                        text = "تلاش دوباره",
-                        height = 45,
-                        isLoading = false,
-                        onClick = {
-                            onRetryClick()
-                        }
-                    )
-                }
+        RetryContent(
+        modifier = Modifier,
+            error = "مشکلی از سمت سرور پیش آمده",
+            onClick = {
+                onRetryClick()
             }
         )
-    }else {
-        LazyColumn(
-
-        ){
+    } else {
+        LazyColumn {
             items(drugs.count() , itemContent ={
                     i ->  DarmanItem(
                 darman = darmanData?.getOrNull()!!.data[i] ,

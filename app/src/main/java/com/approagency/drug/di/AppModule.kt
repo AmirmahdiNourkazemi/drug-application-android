@@ -12,6 +12,7 @@ import com.approagency.drug.domain.usecase.GetDrugDetailUseCase
 import com.approagency.drug.domain.usecase.GetDrugSearchUseCase
 import com.approagency.drug.domain.usecase.GetTestGroupUseCase
 import com.approagency.drug.domain.usecase.GetTestItemByGroupId
+import com.approagency.drug.domain.usecase.SearchTestsUseCase
 import com.approagency.drug.presentation.viewModel.HomeViewModel
 import com.approagency.drug.presentation.viewModel.LabViewModel
 import com.approagency.drug.utils.Config
@@ -68,12 +69,14 @@ val appModule= module {
     }
 
     single { LabRepositoryImpl(get(), get()) }
+
+    single { SearchTestsUseCase(get()) }
     //view model
     viewModel {
         HomeViewModel(get() , get() , get())
     }
 
     viewModel {
-        LabViewModel(get() , get())
+        LabViewModel(get() , get() , get())
     }
 }

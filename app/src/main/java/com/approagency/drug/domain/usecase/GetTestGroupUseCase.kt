@@ -16,7 +16,7 @@ class GetTestGroupUseCase (
                     ename = entity.ename,
                     fname = entity.fname,
                     detail = entity.detail,
-                    isParent = entity.isParent == "1"
+                    isParent = entity.isParent
                 )
             }
         }

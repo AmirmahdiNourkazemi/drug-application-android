@@ -69,6 +69,7 @@ import com.approagency.drug.domain.model.DrugSearchParams
 import com.approagency.drug.presentation.common.CustomBox
 import com.approagency.drug.presentation.common.CustomModalBottomSheet
 import com.approagency.drug.presentation.common.CustomModalDialog
+import com.approagency.drug.presentation.common.CustomTextFilled
 import com.approagency.drug.presentation.common.Loading
 import com.approagency.drug.presentation.common.PrimaryButton
 import com.approagency.drug.presentation.components.DarmanContent
@@ -129,7 +130,7 @@ fun HomeContent(
     onDrugClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var search by remember { mutableStateOf("") }
+    var searchText by remember { mutableStateOf("") }
     Column(
         modifier = modifier
             .fillMaxSize().padding(horizontal = MaterialTheme.dime.md)
@@ -139,70 +140,28 @@ fun HomeContent(
         Column  (
             verticalArrangement = Arrangement.Center
         ){
-            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(45.dp) // Your desired height
-                        .background(
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                            shape =MaterialTheme.shapes.medium
-                        )
-                        .border(
-                            width = 1.dp,
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            shape =MaterialTheme.shapes.medium
-                        )
-                        .padding(horizontal = MaterialTheme.dime.md, vertical = MaterialTheme.dime.sm)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        BasicTextField(
-                            value = search,
-                            onValueChange = { search = it },
-                            modifier = Modifier.weight(1f),
-                            singleLine = true,
-                            textStyle = MaterialTheme.typography.bodyLarge,
-                            decorationBox = { innerTextField ->
-                                Box {
-                                    if (search.isEmpty()) {
-                                        Text(
-                                            "جستجوی دارو",
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                    innerTextField()
-                                }
-                            }
-                        )
-                        IconButton(
-                            onClick = {
-                                if (search.isNotBlank()) {
-                                    onSearch(search)
-                                }
-                            },
-                            modifier = Modifier.size(32.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = "Search",
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
+            CustomTextFilled(
+                value = searchText,
+                onValueChange = { searchText = it },
+                onSearch = { query ->
+                    if (query.isNotBlank()) {
+                        onSearch(query)
                     }
-                }
-            }
+                },
+                placeholder = "جستجوی دارو",
+                showClearButton = true,
+                showSearchButton = true,
+                autoSearch = false, // Set to true if you want search while typing
+                height = 45
+            )
             Spacer(modifier = Modifier.height(MaterialTheme.dime.xs))
             PrimaryButton(
                 text = "جستجو",
                 height = 40,
                 isLoading = state.drugSearchState.isLoading,
                 onClick = {
-                    if (search.isNotBlank()) {
-                        onSearch(search)
+                    if (searchText.isNotBlank()) {
+                        onSearch(searchText)
                     }
                 }
             )

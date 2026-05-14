@@ -12,6 +12,7 @@ import com.approagency.drug.domain.usecase.GetDarmanUseCase
 import com.approagency.drug.domain.usecase.GetDrugDetailUseCase
 import com.approagency.drug.domain.usecase.GetDrugSearchUseCase
 import com.approagency.drug.presentation.screens.HomeScreen
+import com.approagency.drug.utils.retryWithBackoff
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,24 +34,45 @@ class HomeViewModel (
         init {
             getDarmani()
         }
-    fun getDarmani(){
-        _uiState.update { it.copy(darmanState = it.darmanState.copy(
-            isLoading = true
-        ) ,  showDarmanList = true ) }
+    fun getDarmani() {
+        _uiState.update {
+            it.copy(
+                darmanState = it.darmanState.copy(isLoading = true),
+                showDarmanList = true
+            )
+        }
         viewModelScope.launch {
-           try {
-               val result = getDarmanUseCase.invoke()
-               _uiState.update {
-                   it.copy(
-                       darmanState = it.darmanState.copy(
-                           isLoading = false,
-                           getDarmani = result
-                       )
-                   )
-               }
-           } catch (e: HttpException){
-               handleError(e.message)
-           }
+            retryWithBackoff(
+                maxRetries = 3,
+                onRetry = { attempt, delay ->
+                    // Optional: log retry attempt
+                    println("Retrying getDarmani, attempt $attempt, delay $delay ms")
+                }
+            ) {
+                getDarmanUseCase.invoke()
+            }.fold(
+                onSuccess = { result ->
+                    _uiState.update {
+                        it.copy(
+                            darmanState = it.darmanState.copy(
+                                isLoading = false,
+                                getDarmani = result
+                            )
+                        )
+                    }
+                },
+                onFailure = { error ->
+                    handleError(error.message ?: "Unknown error")
+                    _uiState.update {
+                        it.copy(
+                            darmanState = it.darmanState.copy(
+                                isLoading = false,
+                                getDarmani = Result.failure(error)
+                            )
+                        )
+                    }
+                }
+            )
         }
     }
 

@@ -20,8 +20,18 @@ interface TestItemDao {
 
     @Query("""
         SELECT ti.* FROM testItem ti
-        INNER JOIN testGroup tg ON ti.Group_Id = tg.Id
-        WHERE tg.Isparent = '0' AND ti.Title LIKE '%' || :searchQuery || '%'
+        LEFT JOIN testGroup tg ON ti.Group_Id = tg.Id
+        WHERE ti.Title LIKE '%' || :searchQuery || '%' 
+           OR ti.Normal_Value LIKE '%' || :searchQuery || '%'
+           OR ti.Detail LIKE '%' || :searchQuery || '%'
+           OR tg.Fname LIKE '%' || :searchQuery || '%'
+           OR tg.Ename LIKE '%' || :searchQuery || '%'
+        ORDER BY 
+            CASE 
+                WHEN ti.Title LIKE '%' || :searchQuery || '%' THEN 1
+                WHEN tg.Fname LIKE '%' || :searchQuery || '%' THEN 2
+                ELSE 3
+            END
     """)
     fun searchTestItems(searchQuery: String): Flow<List<TestItemEntity>>
 
