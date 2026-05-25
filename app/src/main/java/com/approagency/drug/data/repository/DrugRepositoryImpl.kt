@@ -6,6 +6,8 @@ import com.approagency.drug.data.dto.DrugModels
 import com.approagency.drug.data.remote.DarooyabApiService
 import com.approagency.drug.data.remote.DrugApiService
 import com.approagency.drug.data.remote.DrugHtmlParser
+import com.approagency.drug.domain.model.DaroYabParams
+import com.approagency.drug.domain.model.DaroYabSearchResult
 import com.approagency.drug.domain.model.DrugSearchParams
 import com.approagency.drug.domain.model.DrugSearchResult
 import com.approagency.drug.domain.repository.DrugRepository
@@ -30,8 +32,10 @@ class DrugRepositoryImpl(
     override suspend fun drugDetail(cod: Int): Result<DrugModels> {
         return try {
             val response= apiService.getDrugDetail(cod = cod)
+            println(response.message)
             return Result.success(response)
         }catch (e: Exception){
+            println(e.message)
             Result.failure(e)
         }
     }
@@ -45,25 +49,26 @@ class DrugRepositoryImpl(
         }
     }
 
-    override suspend fun searchDrugs(params: DrugSearchParams): Result<List<DrugSearchResult>> {
+    override suspend fun searchDrugs(params: DaroYabParams): Result<DaroYabSearchResult> {
         return withContext(Dispatchers.IO) {
             try {
-                // 1. Fetch raw HTML from the website
-                val htmlResponse = darooyabApiService.searchDrugs(params.query!!)
+                val htmlResponse = darooyabApiService.searchDrugs(
+                    searchText = params.query ?: "",
+                    pageNumber = params.pageNumber
+                )
 
-                // 2. Parse the HTML to extract drug data
-                val drugList = parser.parseSearchResults(htmlResponse)
+                println("HTML Response length: ${htmlResponse.length}")
 
-                if (drugList.isNotEmpty()) {
-                    Result.success(drugList)
+                val searchResult = parser.parseSearchResultsWithPagination(htmlResponse)
+
+                if (searchResult.drugs.isNotEmpty()) {
+                    Result.success(searchResult)
                 } else {
                     Result.failure(Exception("No drugs found for query: '${params.query}'"))
                 }
             } catch (e: IOException) {
-                // Network error
                 Result.failure(Exception("Network error: ${e.message}", e))
             } catch (e: Exception) {
-                // Parsing or other error
                 Result.failure(Exception("An error occurred: ${e.message}", e))
             }
         }

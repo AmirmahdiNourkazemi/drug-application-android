@@ -42,37 +42,21 @@ class HomeViewModel (
             )
         }
         viewModelScope.launch {
-            retryWithBackoff(
-                maxRetries = 3,
-                onRetry = { attempt, delay ->
-                    // Optional: log retry attempt
-                    println("Retrying getDarmani, attempt $attempt, delay $delay ms")
-                }
-            ) {
-                getDarmanUseCase.invoke()
-            }.fold(
-                onSuccess = { result ->
-                    _uiState.update {
-                        it.copy(
-                            darmanState = it.darmanState.copy(
-                                isLoading = false,
-                                getDarmani = result
-                            )
+            try {
+                val result =  getDarmanUseCase.invoke()
+                _uiState.update {
+                    it.copy(
+                        darmanState = it.darmanState.copy(
+                            isLoading = false,
+                            getDarmani = result
                         )
-                    }
-                },
-                onFailure = { error ->
-                    handleError(error.message ?: "Unknown error")
-                    _uiState.update {
-                        it.copy(
-                            darmanState = it.darmanState.copy(
-                                isLoading = false,
-                                getDarmani = Result.failure(error)
-                            )
-                        )
-                    }
+                    )
                 }
-            )
+            }catch (e: Exception) {
+                handleError(e.message)
+            }catch (e: Exception) {
+                handleError(e.localizedMessage ?: "Unknown error")
+            }
         }
     }
 
@@ -83,6 +67,7 @@ class HomeViewModel (
         viewModelScope.launch {
             try {
                 val result = getDrugSearchUseCase.invoke(drugSearchParams)
+                println(result)
                 _uiState.update { it.copy(
                     drugSearchState = it.drugSearchState.copy(
                         isLoading = false,
@@ -90,9 +75,11 @@ class HomeViewModel (
                     )
 
                 ) }
-            } catch (e: HttpException) {
+            } catch (e: Exception) {
+                println(e.message)
                 handleError(e.message)
             }catch (e: Exception) {
+                println(e.message)
                 handleError(e.localizedMessage ?: "Unknown error")
             }
         }
@@ -119,7 +106,7 @@ class HomeViewModel (
                     )
                 }
                 println(result)
-            } catch (e: HttpException) {
+            } catch (e: Exception) {
                 handleError(e.message)
             }catch (e: Exception) {
                 handleError(e.localizedMessage ?: "Unknown error")

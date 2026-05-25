@@ -6,4 +6,5 @@ data class DrugSearchParams(
     val withRelations: Boolean = true,
     val drugGroup: Int? = null,
     val healGroup: Int? = null,
+
 )

@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -54,7 +55,8 @@ import androidx.navigation.NavHostController
 fun RootScreen(navHostController: NavHostController, modifier: Modifier){
     val pages = listOf(
        "دارو" to Icons.Default.Search,
-        "آزمایش" to Icons.Default.Build
+        "آزمایش" to Icons.Default.Build,
+        "سرچ" to Icons.Rounded.Refresh
     )
     var seletedTab by remember { mutableStateOf(0) }
     val context = LocalContext.current
@@ -121,6 +123,7 @@ fun RootScreen(navHostController: NavHostController, modifier: Modifier){
             padding -> when (seletedTab) {
         0 -> HomeScreen( navController = navHostController,Modifier.padding(padding).consumeWindowInsets(padding))
         1 -> LabScreen(Modifier.padding(padding))
+        2 -> SearchScreen(navHostController,modifier = Modifier.padding(padding).consumeWindowInsets(padding))
     }
     }
 }

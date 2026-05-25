@@ -19,6 +19,7 @@ import com.approagency.drug.domain.usecase.SearchTestsUseCase
 import com.approagency.drug.presentation.viewModel.HomeViewModel
 import com.approagency.drug.presentation.viewModel.LabViewModel
 import com.approagency.drug.utils.Config
+import com.approgency.drug.presentation.viewModel.SearchViewModel
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
@@ -26,6 +27,9 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
+import java.net.CookieManager
+import java.net.CookiePolicy
 import java.util.concurrent.TimeUnit
 
 val appModule= module {
@@ -35,17 +39,23 @@ val appModule= module {
     single { get<LabDatabase>().testGroupDao() }
     single { get<LabDatabase>().testItemDao() }
 
+    // Shared OkHttpClient for both APIs
     single {
+        val cookieManager = CookieManager()
+        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL)
+
         OkHttpClient.Builder()
             .addInterceptor(HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BASIC
+                level = HttpLoggingInterceptor.Level.BODY  // Change to BODY for debugging
             })
+            // Add cookie support
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
+            .followRedirects(true)
             .build()
     }
 
-    // ========== Retrofit for YOUR API ==========
+    // ========== Retrofit for YOUR JSON API ==========
     single {
         Retrofit.Builder()
             .baseUrl(Config.BASE_URL)
@@ -55,19 +65,24 @@ val appModule= module {
     }
 
     single<DrugApiService> {
-        get<Retrofit>().create(DrugApiService::class.java)
+        val retrofit: Retrofit = get()
+        retrofit.create(DrugApiService::class.java)
     }
 
-    // ========== Retrofit for DAROOYAB Website API ==========
+    // ========== Retrofit for DAROOYAB Website (HTML response) ==========
+    // IMPORTANT: Use ScalarsConverterFactory for plain text/HTML, NOT Gson!
     single {
         Retrofit.Builder()
-            .baseUrl(Config.Darro_Url) // Darooyab base URL
+            .baseUrl(Config.Darro_Url)
             .client(get<OkHttpClient>())
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(ScalarsConverterFactory.create()) // This handles String responses
             .build()
-            .let { retrofit ->
-                retrofit.create(DarooyabApiService::class.java)
-            }
+    }
+
+    // Create the API service from the Scalars-based Retrofit instance
+    single<DarooyabApiService> {
+        val retrofit: Retrofit = get()  // Gets the Scalars Retrofit instance
+        retrofit.create(DarooyabApiService::class.java)
     }
 
 
@@ -112,6 +127,10 @@ val appModule= module {
     //view model
     viewModel {
         HomeViewModel(get() , get() , get())
+    }
+
+    viewModel {
+        SearchViewModel(get())
     }
 
     viewModel {

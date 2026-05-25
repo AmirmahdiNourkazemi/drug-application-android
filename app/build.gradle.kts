@@ -92,4 +92,5 @@ dependencies {
     //crawl
     implementation(libs.jsoup)
 
+    implementation(libs.retrofit.scalars)
 }
