@@ -24,6 +24,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
+import org.koin.core.qualifier.qualifier
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -31,7 +32,8 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.net.CookieManager
 import java.net.CookiePolicy
 import java.util.concurrent.TimeUnit
-
+val jsonRetrofitQualifier = qualifier("jsonRetrofit")
+val scalarRetrofitQualifier = qualifier("scalarRetrofit")
 val appModule= module {
 
     single { LabDatabase.getInstance(androidContext()) }
@@ -55,8 +57,7 @@ val appModule= module {
             .build()
     }
 
-    // ========== Retrofit for YOUR JSON API ==========
-    single {
+    single<Retrofit>(jsonRetrofitQualifier) {  // Add qualifier
         Retrofit.Builder()
             .baseUrl(Config.BASE_URL)
             .client(get<OkHttpClient>())
@@ -65,23 +66,21 @@ val appModule= module {
     }
 
     single<DrugApiService> {
-        val retrofit: Retrofit = get()
+        val retrofit: Retrofit = get(jsonRetrofitQualifier)  // Get qualified instance
         retrofit.create(DrugApiService::class.java)
     }
 
-    // ========== Retrofit for DAROOYAB Website (HTML response) ==========
-    // IMPORTANT: Use ScalarsConverterFactory for plain text/HTML, NOT Gson!
-    single {
+    // ========== Retrofit for DAROOYAB Website ==========
+    single<Retrofit>(scalarRetrofitQualifier) {  // Add qualifier
         Retrofit.Builder()
             .baseUrl(Config.Darro_Url)
             .client(get<OkHttpClient>())
-            .addConverterFactory(ScalarsConverterFactory.create()) // This handles String responses
+            .addConverterFactory(ScalarsConverterFactory.create())
             .build()
     }
 
-    // Create the API service from the Scalars-based Retrofit instance
     single<DarooyabApiService> {
-        val retrofit: Retrofit = get()  // Gets the Scalars Retrofit instance
+        val retrofit: Retrofit = get(scalarRetrofitQualifier)  // Get qualified instance
         retrofit.create(DarooyabApiService::class.java)
     }
 

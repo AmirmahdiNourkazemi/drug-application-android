@@ -43,6 +43,7 @@ class DrugRepositoryImpl(
     override suspend fun getGorohDaroei(): Result<DarmanModel> {
         return  try {
              val response = apiService.getGorohDaroei()
+            println(response)
             return Result.success(response)
         }catch (e: Exception){
             Result.failure(e)
