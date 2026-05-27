@@ -39,13 +39,17 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val snackbarHostState = remember { SnackbarHostState() }
                 val scope = rememberCoroutineScope()
-                Scaffold(modifier = Modifier.fillMaxSize(),
-                    ) { innerPadding ->
-                    AppNavGraph(
+                AppNavGraph(
 //                        navController = navController,
 //                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                )
+//                Scaffold(modifier = Modifier.fillMaxSize(),
+//                    ) { innerPadding ->
+//                    AppNavGraph(
+////                        navController = navController,
+////                        modifier = Modifier.padding(innerPadding)
+//                    )
+//                }
             }
         }
     }
