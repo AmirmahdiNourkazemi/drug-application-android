@@ -535,23 +535,94 @@ class DrugDetailParser {
      * Converts block elements to newlines for better readability.
      */
     private fun cleanText(element: Element): String {
-        // Clone to avoid affecting the original
         val clone = element.clone()
+        val output = StringBuilder()
 
-        // Replace block-level elements with newlines for structure
-        clone.select("p, div, h2, h3, h4, li, br").before("\n")
+        // Process all nodes in order (both elements and text nodes)
+        processNode(clone, output)
 
-        // Get the text and clean it up
-        var text = clone.text()
-            .replace(Regex("\\n\\s*\\n+"), "\n\n") // Collapse multiple newlines
-            .replace(Regex("[ \\t]+"), " ")        // Collapse spaces/tabs
+        return output.toString()
+            .replace(Regex("\\n{3,}"), "\n\n")  // Collapse 3+ newlines to 2
             .trim()
+    }
 
-        // Ensure lists look decent
-        if (element.tagName() == "li") {
-            text = "• $text"
+    /**
+     * Recursively process nodes to build formatted text
+     */
+    private fun processNode(node: org.jsoup.nodes.Node, output: StringBuilder) {
+        when (node) {
+            is Element -> {
+                when (node.tagName()) {
+                    "h2" -> {
+                        val text = node.text().trim()
+                        if (text.isNotEmpty()) {
+                            output.append("\n\n📌 $text\n\n")
+                            output.append("─".repeat(minOf(30, text.length))).append("\n\n")
+                        }
+                    }
+                    "h3" -> {
+                        val text = node.text().trim()
+                        if (text.isNotEmpty()) {
+                            output.append("\n\n🔹 $text\n\n")
+                        }
+                    }
+                    "h4" -> {
+                        val text = node.text().trim()
+                        if (text.isNotEmpty()) {
+                            output.append("\n▸ $text\n")
+                        }
+                    }
+                    "p" -> {
+                        val text = node.text().trim()
+                        if (text.isNotEmpty()) {
+                            output.append(text).append("\n\n")
+                        }
+                    }
+                    "ul", "ol" -> {
+                        for (li in node.select("li")) {
+                            val liText = li.text().trim()
+                            if (liText.isNotEmpty()) {
+                                output.append("  • $liText\n")
+                            }
+                        }
+                        output.append("\n")
+                    }
+                    "li" -> {
+                        // Handled by ul/ol processing, but if standalone:
+                        val text = node.text().trim()
+                        if (text.isNotEmpty()) {
+                            output.append("  • $text\n")
+                        }
+                    }
+                    "br" -> {
+                        output.append("\n")
+                    }
+                    "strong", "b" -> {
+                        val text = node.text().trim()
+                        if (text.isNotEmpty()) {
+                            output.append("**$text**")
+                        }
+                    }
+                    "div", "section", "article" -> {
+                        // Process children of container elements
+                        for (child in node.childNodes()) {
+                            processNode(child, output)
+                        }
+                    }
+                    else -> {
+                        // For other elements, just process their children
+                        for (child in node.childNodes()) {
+                            processNode(child, output)
+                        }
+                    }
+                }
+            }
+            is org.jsoup.nodes.TextNode -> {
+                val text = node.text().trim()
+                if (text.isNotEmpty()) {
+                    output.append(text)
+                }
+            }
         }
-
-        return text
     }
 }
