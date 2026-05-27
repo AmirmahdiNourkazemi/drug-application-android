@@ -5,10 +5,12 @@ import android.app.Application
 import com.approagency.drug.data.local.database.LabDatabase
 import com.approagency.drug.data.remote.DarooyabApiService
 import com.approagency.drug.data.remote.DrugApiService
+import com.approagency.drug.data.remote.DrugDetailParser
 import com.approagency.drug.data.remote.DrugHtmlParser
 import com.approagency.drug.data.repository.DrugRepositoryImpl
 import com.approagency.drug.data.repository.LabRepositoryImpl
 import com.approagency.drug.domain.repository.DrugRepository
+import com.approagency.drug.domain.usecase.DrugDetailYabUseCase
 import com.approagency.drug.domain.usecase.GetDarmanUseCase
 import com.approagency.drug.domain.usecase.GetDrugDetailUseCase
 import com.approagency.drug.domain.usecase.GetDrugSearchUseCase
@@ -16,6 +18,7 @@ import com.approagency.drug.domain.usecase.GetTestGroupUseCase
 import com.approagency.drug.domain.usecase.GetTestItemByGroupId
 import com.approagency.drug.domain.usecase.SearchDrugsYabUseCase
 import com.approagency.drug.domain.usecase.SearchTestsUseCase
+import com.approagency.drug.presentation.viewModel.DrugDetailViewModel
 import com.approagency.drug.presentation.viewModel.HomeViewModel
 import com.approagency.drug.presentation.viewModel.LabViewModel
 import com.approagency.drug.utils.Config
@@ -86,10 +89,10 @@ val appModule= module {
 
 
     factory { DrugHtmlParser() }
-
+    factory { DrugDetailParser() }
     //repo
     single<DrugRepository> {
-        DrugRepositoryImpl(get<DrugApiService>() , get<DarooyabApiService>() , get())
+        DrugRepositoryImpl(get<DrugApiService>() , get<DarooyabApiService>() , get() , get())
     }
 
 
@@ -121,6 +124,14 @@ val appModule= module {
     }
 
     single { LabRepositoryImpl(get(), get()) }
+
+    single {
+        DrugDetailYabUseCase(get())
+    }
+
+    viewModel {
+        DrugDetailViewModel(get())
+    }
 
     single { SearchTestsUseCase(get()) }
     //view model

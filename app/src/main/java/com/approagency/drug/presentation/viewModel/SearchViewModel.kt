@@ -1,5 +1,8 @@
 package com.approgency.drug.presentation.viewModel
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.approagency.drug.domain.model.DrugSearchResult
@@ -16,7 +19,12 @@ class SearchViewModel(
 
     private val _searchState = MutableStateFlow<SearchState>(SearchState.Idle)
     val searchState: StateFlow<SearchState> = _searchState.asStateFlow()
+    var searchText by mutableStateOf("")
+        private set
 
+    fun updateSearchText(value: String) {
+        searchText = value
+    }
     private var currentQuery = ""
     private var currentPage = 1
     private var totalPages = 1

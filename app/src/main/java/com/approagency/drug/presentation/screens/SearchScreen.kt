@@ -1,21 +1,16 @@
 package com.approagency.drug.presentation.screens
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,14 +22,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.approagency.drug.domain.model.DaroYabSearchResult
-import com.approagency.drug.domain.model.DrugSearchResult
+import com.approagency.drug.navigation.Screen
 import com.approagency.drug.presentation.common.CustomTextFilled
 import com.approagency.drug.presentation.common.EmptySearchState
 import com.approagency.drug.presentation.common.EndOfListIndicator
@@ -42,12 +32,12 @@ import com.approagency.drug.presentation.common.ErrorState
 import com.approagency.drug.presentation.common.LoadingMoreIndicator
 import com.approagency.drug.presentation.common.PrimaryButton
 import com.approagency.drug.presentation.components.DaroYabSearchResult
-import com.approagency.drug.presentation.components.PaginationControls
+import com.approagency.drug.presentation.components.DrugDetailBottomSheet
+import com.approagency.drug.presentation.viewModel.DrugDetailViewModel
 import com.approgency.drug.presentation.viewModel.SearchState
 import com.approgency.drug.presentation.viewModel.SearchViewModel
 import com.vada.caller.ui.theme.LocalDime
 import com.vada.caller.ui.theme.dime
-import kotlinx.coroutines.flow.collect
 import org.koin.androidx.compose.koinViewModel
 
 
@@ -55,22 +45,29 @@ import org.koin.androidx.compose.koinViewModel
 fun SearchScreen(
     navController: NavController,
     modifier: Modifier = Modifier,
-    viewModel: SearchViewModel = koinViewModel()
+    viewModel: SearchViewModel = koinViewModel(),
+    drugDetailViewModel: DrugDetailViewModel = koinViewModel() // اضافه کنید
 ) {
     val dime = LocalDime.current
     val keyboardController = LocalSoftwareKeyboardController.current
-    var searchText by remember { mutableStateOf("") }
+    val searchText = viewModel.searchText
     val state by viewModel.searchState.collectAsState()
     val lazyListState = rememberLazyListState()
-
+    var selectedDrugUrl by remember { mutableStateOf<String?>(null) }
     // Auto-search for testing (remove in production)
-    LaunchedEffect(Unit) {
-        if (searchText.isEmpty()) {
-            searchText = "انتی"
-            viewModel.searchDrugs(searchText)
-        }
+//    LaunchedEffect(Unit) {
+//        if (searchText.isEmpty()) {
+//            searchText = "انتی"
+//            viewModel.searchDrugs(searchText)
+//        }
+//    }
+    if (selectedDrugUrl != null) {
+        DrugDetailBottomSheet(
+            detailUrl = selectedDrugUrl,
+            onDismiss = { selectedDrugUrl = null },
+            viewModel = drugDetailViewModel
+        )
     }
-
     // Detect when user scrolls to the bottom to load more
     LaunchedEffect(lazyListState) {
         snapshotFlow { lazyListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
@@ -95,7 +92,7 @@ fun SearchScreen(
         // Search input
         CustomTextFilled(
             value = searchText,
-            onValueChange = { searchText = it },
+            onValueChange = { viewModel.updateSearchText(it) },
             onSearch = { query ->
                 if (query.isNotBlank()) {
                     keyboardController?.hide()
@@ -105,7 +102,7 @@ fun SearchScreen(
             placeholder = "جستجوی دارو",
             showClearButton = true,
             showSearchButton = true,
-            autoSearch = true, // Set to true if you want search while typing
+            autoSearch = false,
             height = 45
         )
         Spacer(modifier = Modifier.height(MaterialTheme.dime.xs))
@@ -144,9 +141,12 @@ fun SearchScreen(
                     items(currentState.currentItems) { drug ->
                         DaroYabSearchResult(
                             drug = drug,
-                            onClickDetail = { selectedDrug ->println(selectedDrug.detailPageUrl)
-                                // Navigate to drug detail
-                                // navController.navigate("drug_detail/${selectedDrug.genericId}")
+                            onClickDetail = { selectedDrug ->
+                                navController.navigate(
+                                    Screen.DrugDetail.createRoute(
+                                        selectedDrug.detailPageUrl
+                                    )
+                                )
                             },
                             onClickDrugStore = {}
                         )
@@ -165,9 +165,12 @@ fun SearchScreen(
                         items(currentState.drugs) { drug ->
                             DaroYabSearchResult(
                                 drug = drug,
-                                onClickDetail = { selectedDrug -> println(selectedDrug.detailPageUrl)
-                                    // Navigate to drug detail
-                                    // navController.navigate("drug_detail/${selectedDrug.genericId}")
+                                onClickDetail = { selectedDrug ->
+                                    navController.navigate(
+                                        Screen.DrugDetail.createRoute(
+                                            selectedDrug.detailPageUrl
+                                        )
+                                    )
                                 },
                                 onClickDrugStore = {}
                             )

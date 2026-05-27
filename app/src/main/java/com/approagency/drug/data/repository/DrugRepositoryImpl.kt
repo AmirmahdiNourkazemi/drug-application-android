@@ -5,9 +5,11 @@ import com.approagency.drug.data.dto.DrugListResponse
 import com.approagency.drug.data.dto.DrugModels
 import com.approagency.drug.data.remote.DarooyabApiService
 import com.approagency.drug.data.remote.DrugApiService
+import com.approagency.drug.data.remote.DrugDetailParser
 import com.approagency.drug.data.remote.DrugHtmlParser
 import com.approagency.drug.domain.model.DaroYabParams
 import com.approagency.drug.domain.model.DaroYabSearchResult
+import com.approagency.drug.domain.model.DrugDetail
 import com.approagency.drug.domain.model.DrugSearchParams
 import com.approagency.drug.domain.model.DrugSearchResult
 import com.approagency.drug.domain.repository.DrugRepository
@@ -18,7 +20,8 @@ import java.io.IOException
 class DrugRepositoryImpl(
     private val apiService: DrugApiService,
     private val darooyabApiService: DarooyabApiService,
-    private val parser: DrugHtmlParser
+    private val parser: DrugHtmlParser,
+    private val detailParser: DrugDetailParser,
 ): DrugRepository {
     override suspend fun searchDrug(params: DrugSearchParams): Result<DrugListResponse> {
         return try {
@@ -71,6 +74,18 @@ class DrugRepositoryImpl(
                 Result.failure(Exception("Network error: ${e.message}", e))
             } catch (e: Exception) {
                 Result.failure(Exception("An error occurred: ${e.message}", e))
+            }
+        }
+    }
+
+    override suspend fun getDrugDetailFromYab(detailUrl: String): Result<DrugDetail> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val html = darooyabApiService.getDrugDetail(detailUrl)
+                val detail = detailParser.parseDrugDetail(html)
+                Result.success(detail)
+            } catch (e: Exception) {
+                Result.failure(e)
             }
         }
     }
