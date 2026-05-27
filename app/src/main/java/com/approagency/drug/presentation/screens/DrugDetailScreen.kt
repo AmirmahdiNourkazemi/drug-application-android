@@ -25,12 +25,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -39,8 +41,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -70,145 +74,154 @@ fun DrugDetailScreen(
         viewModel.loadDrugDetail(detailUrl)
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    when (val state = detailState) {
-                        is DrugDetailYabState.Success -> {
-                            Column {
-                                Text(
-                                    text = state.drugDetail.persianName.take(25),
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    maxLines = 1
-                                )
-                                if (state.drugDetail.englishName.isNotEmpty()) {
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        when (val state = detailState) {
+                            is DrugDetailYabState.Success -> {
+                                Column {
                                     Text(
-                                        text = state.drugDetail.englishName.take(30),
-                                        fontSize = 11.sp,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                        text = state.drugDetail.persianName.take(25),
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Medium,
                                         maxLines = 1
                                     )
-                                }
-                            }
-                        }
-                        else -> {
-                            Text("جزئیات دارو", fontSize = 16.sp)
-                        }
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "بازگشت"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            )
-        }
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            when (val state = detailState) {
-                DrugDetailYabState.Idle -> {}
-
-                DrugDetailYabState.Loading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            CircularProgressIndicator(
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(48.dp)
-                            )
-                            Spacer(modifier = Modifier.height(dime.md))
-                            Text(
-                                text = "در حال دریافت اطلاعات دارو...",
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                            )
-                        }
-                    }
-                }
-
-                is DrugDetailYabState.Success -> {
-                    val drugDetail = state.drugDetail
-
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        // Manufacturer Info Card (برای صفحات برند)
-                        if (!drugDetail.isGeneric && drugDetail.manufacturer != null) {
-                            ManufacturerInfoCard(
-                                manufacturer = drugDetail.manufacturer!!,
-                                genericInfo = drugDetail.genericInfo,
-                                modifier = Modifier.padding(horizontal = dime.md, vertical = dime.sm)
-                            )
-                        }
-
-                        // Tab Row
-                        TabRow(
-                            selectedTabIndex = selectedTab,
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            contentColor = MaterialTheme.colorScheme.primary
-                        ) {
-                            tabs.forEachIndexed { index, title ->
-                                Tab(
-                                    selected = selectedTab == index,
-                                    onClick = { selectedTab = index },
-                                    text = {
+                                    if (state.drugDetail.englishName.isNotEmpty()) {
                                         Text(
-                                            text = title,
-                                            fontSize = 13.sp,
-                                            fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal,
+                                            text = state.drugDetail.englishName.take(30),
+                                            fontSize = 11.sp,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                                             maxLines = 1
                                         )
                                     }
+                                }
+                            }
+
+                            else -> {
+                                Text("جزئیات دارو", fontSize = 16.sp)
+                            }
+                        }
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { navController.popBackStack() }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "بازگشت"
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    )
+                )
+            }
+        ) { paddingValues ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
+                when (val state = detailState) {
+                    DrugDetailYabState.Idle -> {}
+
+                    DrugDetailYabState.Loading -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                CircularProgressIndicator(
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(48.dp)
+                                )
+                                Spacer(modifier = Modifier.height(dime.md))
+                                Text(
+                                    text = "در حال دریافت اطلاعات دارو...",
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                                 )
                             }
                         }
+                    }
 
-                        // Tab Content
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = dime.md)
-                                .padding(top = dime.md),
-                            verticalArrangement = Arrangement.spacedBy(dime.md)
-                        ) {
-                            when (selectedTab) {
-                                0 -> {
-                                    item { GeneralInfoTabContent(drugDetail) }
+                    is DrugDetailYabState.Success -> {
+                        val drugDetail = state.drugDetail
+
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            // Manufacturer Info Card (برای صفحات برند)
+                            if (!drugDetail.isGeneric && drugDetail.manufacturer != null) {
+                                ManufacturerInfoCard(
+                                    manufacturer = drugDetail.manufacturer!!,
+                                    genericInfo = drugDetail.genericInfo,
+                                    modifier = Modifier.padding(
+                                        horizontal = dime.md,
+                                        vertical = dime.sm
+                                    )
+                                )
+                            }
+
+                            // Tab Row
+                            TabRow(
+                                selectedTabIndex = selectedTab,
+                                containerColor = MaterialTheme.colorScheme.surface,
+                                contentColor = MaterialTheme.colorScheme.primary
+                            ) {
+                                tabs.forEachIndexed { index, title ->
+                                    Tab(
+                                        selected = selectedTab == index,
+                                        onClick = { selectedTab = index },
+                                        text = {
+                                            Text(
+                                                text = title,
+                                                fontSize = 13.sp,
+                                                fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal,
+                                                maxLines = 1
+                                            )
+                                        }
+                                    )
                                 }
-                                1 -> {
-                                    item { SpecializedInfoTabContent(drugDetail) }
-                                }
-                                2 -> {
-                                    item { DosageFormsTabContent(drugDetail) }
-                                }
-                                3 -> {
-                                    item { BrandNamesTabContent(drugDetail) }
+                            }
+
+                            // Tab Content
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = dime.md)
+                                    .padding(top = dime.md),
+                                verticalArrangement = Arrangement.spacedBy(dime.md)
+                            ) {
+                                when (selectedTab) {
+                                    0 -> {
+                                        item { GeneralInfoTabContent(drugDetail) }
+                                    }
+
+                                    1 -> {
+                                        item { SpecializedInfoTabContent(drugDetail) }
+                                    }
+
+                                    2 -> {
+                                        item { DosageFormsTabContent(drugDetail) }
+                                    }
+
+                                    3 -> {
+                                        item { BrandNamesTabContent(drugDetail) }
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                is DrugDetailYabState.Error -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        ErrorState(
-                            message = state.message,
-                            onRetry = { viewModel.loadDrugDetail(detailUrl) }
-                        )
+                    is DrugDetailYabState.Error -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            ErrorState(
+                                message = state.message,
+                                onRetry = { viewModel.loadDrugDetail(detailUrl) }
+                            )
+                        }
                     }
                 }
             }
