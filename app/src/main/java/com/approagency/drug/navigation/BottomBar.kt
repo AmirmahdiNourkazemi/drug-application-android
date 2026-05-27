@@ -39,62 +39,56 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 
 @Composable
-fun BottomBar(
-    navController: NavHostController
-) {
+fun BottomBar(navController: NavHostController) {
+
     val items = listOf(
-        Triple(MainRoute.HomeGraph, "دارو", Icons.Default.Search),
-        Triple(MainRoute.SearchGraph, "سرچ", Icons.Rounded.Refresh),
-        Triple(MainRoute.LabGraph, "آزمایش", Icons.Default.Build)
+        Triple("home", "دارو", Icons.Default.Search),
+        Triple("search", "سرچ", Icons.Rounded.Refresh),
+        Triple("lab", "آزمایش", Icons.Default.Build)
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = navBackStackEntry?.destination
+    val currentRoute = navBackStackEntry?.destination?.route
+
     Surface(
         tonalElevation = 2.dp,
-        color = MaterialTheme.colorScheme.surface,
         modifier = Modifier
             .navigationBarsPadding()
-            .height(50.dp)
+            .height(56.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically) {
 
             items.forEach { item ->
 
-                val selected = currentDestination
-                    ?.hierarchy
-                    ?.any { it.route == item.first.route } == true
+                val selected = currentRoute == item.first
 
                 val color = if (selected)
                     MaterialTheme.colorScheme.primary
                 else
                     MaterialTheme.colorScheme.onSurfaceVariant
-
                 val background = if (selected)
                     MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
                 else
                     Color.Transparent
-
                 Box(
                     modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 8.dp , vertical = 4.dp)
+                        .weight(1f).padding(horizontal = 8.dp , vertical = 4.dp)
                         .clip(MaterialTheme.shapes.large)
                         .background(background)
                         .clickable {
-                            navController.navigate(item.first.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+                            if (!selected) {
+                                navController.navigate(item.first) {
+                                    popUpTo("home") {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-                                launchSingleTop = true
-                                restoreState = true
                             }
-                        }
-                        .padding(horizontal = 10.dp, vertical = 10.dp),
-                    contentAlignment = Alignment.Center
+                        }.padding(horizontal = 10.dp, vertical = 10.dp),
+
+                contentAlignment = Alignment.Center
                 ) {
 
                     Row(

@@ -36,9 +36,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             DrugTheme {
-                val navController = rememberNavController()
-                val snackbarHostState = remember { SnackbarHostState() }
-                val scope = rememberCoroutineScope()
+
                 AppNavGraph(
 //                        navController = navController,
 //                        modifier = Modifier.padding(innerPadding)
