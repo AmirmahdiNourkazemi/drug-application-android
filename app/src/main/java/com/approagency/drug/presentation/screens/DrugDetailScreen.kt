@@ -12,12 +12,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -36,7 +34,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -66,6 +63,7 @@ fun DrugDetailScreen(
     val dime = LocalDime.current
     val detailState by viewModel.detailState.collectAsStateWithLifecycle()
     var selectedTab by remember { mutableIntStateOf(0) }
+
     val tabs = listOf("عمومی", "تخصصی", "اشکال دارویی", "اسامی تجاری")
 
     LaunchedEffect(detailUrl) {
@@ -80,16 +78,16 @@ fun DrugDetailScreen(
                         is DrugDetailYabState.Success -> {
                             Column {
                                 Text(
-                                    text = state.drugDetail.persianName.take(20),
+                                    text = state.drugDetail.persianName.take(25),
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Medium,
                                     maxLines = 1
                                 )
                                 if (state.drugDetail.englishName.isNotEmpty()) {
                                     Text(
-                                        text = state.drugDetail.englishName.take(25),
-                                        fontSize = 12.sp,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                        text = state.drugDetail.englishName.take(30),
+                                        fontSize = 11.sp,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                                         maxLines = 1
                                     )
                                 }
@@ -120,9 +118,7 @@ fun DrugDetailScreen(
                 .padding(paddingValues)
         ) {
             when (val state = detailState) {
-                DrugDetailYabState.Idle -> {
-                    // Initial state
-                }
+                DrugDetailYabState.Idle -> {}
 
                 DrugDetailYabState.Loading -> {
                     Box(
@@ -144,9 +140,18 @@ fun DrugDetailScreen(
                 }
 
                 is DrugDetailYabState.Success -> {
-                    Column(
-                        modifier = Modifier.fillMaxSize()
-                    ) {
+                    val drugDetail = state.drugDetail
+
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        // Manufacturer Info Card (برای صفحات برند)
+                        if (!drugDetail.isGeneric && drugDetail.manufacturer != null) {
+                            ManufacturerInfoCard(
+                                manufacturer = drugDetail.manufacturer!!,
+                                genericInfo = drugDetail.genericInfo,
+                                modifier = Modifier.padding(horizontal = dime.md, vertical = dime.sm)
+                            )
+                        }
+
                         // Tab Row
                         TabRow(
                             selectedTabIndex = selectedTab,
@@ -160,8 +165,9 @@ fun DrugDetailScreen(
                                     text = {
                                         Text(
                                             text = title,
-                                            fontSize = 14.sp,
-                                            fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal
+                                            fontSize = 13.sp,
+                                            fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal,
+                                            maxLines = 1
                                         )
                                     }
                                 )
@@ -178,16 +184,16 @@ fun DrugDetailScreen(
                         ) {
                             when (selectedTab) {
                                 0 -> {
-                                    item { GeneralInfoTabContent(state.drugDetail) }
+                                    item { GeneralInfoTabContent(drugDetail) }
                                 }
                                 1 -> {
-                                    item { SpecializedInfoTabContent(state.drugDetail) }
+                                    item { SpecializedInfoTabContent(drugDetail) }
                                 }
                                 2 -> {
-                                    item { DosageFormsTabContent(state.drugDetail.dosageForms) }
+                                    item { DosageFormsTabContent(drugDetail) }
                                 }
                                 3 -> {
-                                    item { BrandNamesTabContent(state.drugDetail.brandNames) }
+                                    item { BrandNamesTabContent(drugDetail) }
                                 }
                             }
                         }
@@ -211,117 +217,286 @@ fun DrugDetailScreen(
 }
 
 @Composable
-fun GeneralInfoTabContent(drugDetail: DrugDetail) {
+fun ManufacturerInfoCard(
+    manufacturer: String,
+    genericInfo: com.approagency.drug.domain.model.GenericInfo?,
+    modifier: Modifier = Modifier
+) {
     val dime = LocalDime.current
 
-    Column(verticalArrangement = Arrangement.spacedBy(dime.md)) {
-        // Categories Card
-        if (drugDetail.drugClass != null || drugDetail.therapeuticClass != null) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
-                ),
-                shape = RoundedCornerShape(dime.sm)
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f)
+        ),
+        shape = RoundedCornerShape(dime.sm)
+    ) {
+        Column(
+            modifier = Modifier.padding(dime.md),
+            verticalArrangement = Arrangement.spacedBy(dime.xs)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(dime.xs)
             ) {
-                Column(
-                    modifier = Modifier.padding(dime.md),
-                    verticalArrangement = Arrangement.spacedBy(dime.xs)
-                ) {
-                    drugDetail.drugClass?.let {
-                        Row {
-                            Text(
-                                text = "طبقه بندی مارتیندل: ",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 14.sp
-                            )
-                            Text(
-                                text = it,
-                                fontSize = 14.sp,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
-                    drugDetail.therapeuticClass?.let {
-                        Row {
-                            Text(
-                                text = "طبقه درمانی: ",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 14.sp
-                            )
-                            Text(
-                                text = it,
-                                fontSize = 14.sp,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
-                }
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = "سازنده:",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp
+                )
+                Text(
+                    text = manufacturer,
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
-        }
 
-        // Pregnancy Card
-        if (drugDetail.pregnancyCategory != null || drugDetail.pregnancyDescription != null) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFFFFF3E0)
-                ),
-                shape = RoundedCornerShape(dime.sm)
-            ) {
-                Column(
-                    modifier = Modifier.padding(dime.md),
-                    verticalArrangement = Arrangement.spacedBy(dime.xs)
+            if (genericInfo != null) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(dime.xs)
                 ) {
-                    Text(
-                        text = "مصرف در بارداری",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = Color(0xFFE65100)
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.primary
                     )
-                    drugDetail.pregnancyCategory?.let {
-                        Text(
-                            text = "گروه: $it",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                    drugDetail.pregnancyDescription?.let {
-                        Text(
-                            text = it,
-                            fontSize = 13.sp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                        )
-                    }
+                    Text(
+                        text = "ماده موثره:",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp
+                    )
+                    Text(
+                        text = genericInfo.persianName,
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
-        }
-
-        // Usage Section
-        drugDetail.usage?.let {
-            InfoSectionCard(title = "موارد مصرف", content = it)
-        }
-
-        // Contraindications Section
-        drugDetail.contraindications?.let {
-            InfoSectionCard(title = "موارد منع مصرف", content = it)
-        }
-
-        // Side Effects Section
-        drugDetail.sideEffects?.let {
-            InfoSectionCard(title = "عوارض جانبی", content = it)
-        }
-
-        // Warnings Section
-        drugDetail.warnings?.let {
-            InfoSectionCard(title = "هشدارها", content = it)
         }
     }
 }
 
+// آپدیت GeneralInfoTabContent برای صفحات Generic
+@Composable
+fun GeneralInfoTabContent(drugDetail: DrugDetail) {
+    val dime = LocalDime.current
+
+    Column(verticalArrangement = Arrangement.spacedBy(dime.md)) {
+
+        if (drugDetail.isGeneric) {
+            // ========== صفحات ژنریک (Generic) ==========
+
+            // اگر generalInfo وجود دارد (از EtelaatOmomiVaTakhasosi یا EtelaatOmomi)
+            if (!drugDetail.generalInfo.isNullOrBlank()) {
+                InfoSectionCard(
+                    title = "اطلاعات عمومی",
+                    content = drugDetail.generalInfo
+                )
+            }
+            // اگر specializedInfo وجود دارد (از EtelaatTakhasosiContent)
+            else if (!drugDetail.specializedInfo.isNullOrBlank()) {
+                InfoSectionCard(
+                    title = "اطلاعات تخصصی",
+                    content = drugDetail.specializedInfo
+                )
+            }
+            // در غیر این صورت، اطلاعات پراکنده را نمایش بده
+            else {
+                // Categories Card
+                if (drugDetail.drugClass != null || drugDetail.therapeuticClass != null) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
+                        ),
+                        shape = RoundedCornerShape(dime.sm)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(dime.md),
+                            verticalArrangement = Arrangement.spacedBy(dime.xs)
+                        ) {
+                            drugDetail.drugClass?.let {
+                                Row {
+                                    Text(
+                                        text = "طبقه بندی مارتیندل: ",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 13.sp
+                                    )
+                                    Text(
+                                        text = it,
+                                        fontSize = 13.sp,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
+                            drugDetail.therapeuticClass?.let {
+                                Row {
+                                    Text(
+                                        text = "طبقه درمانی: ",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 13.sp
+                                    )
+                                    Text(
+                                        text = it,
+                                        fontSize = 13.sp,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Pregnancy Card
+                if (drugDetail.pregnancyCategory != null || drugDetail.pregnancyDescription != null) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0xFFFFF3E0)
+                        ),
+                        shape = RoundedCornerShape(dime.sm)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(dime.md),
+                            verticalArrangement = Arrangement.spacedBy(dime.xs)
+                        ) {
+                            Text(
+                                text = "مصرف در بارداری",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp,
+                                color = Color(0xFFE65100)
+                            )
+                            drugDetail.pregnancyCategory?.let {
+                                Text(
+                                    text = "گروه: $it",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                            drugDetail.pregnancyDescription?.let {
+                                Spacer(modifier = Modifier.height(dime.xs))
+                                Text(
+                                    text = it,
+                                    fontSize = 12.sp,
+                                    lineHeight = 18.sp,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // موارد مصرف
+                drugDetail.usage?.let {
+                    InfoSectionCard(title = "موارد مصرف", content = it)
+                }
+
+                // موارد منع مصرف
+                drugDetail.contraindications?.let {
+                    InfoSectionCard(title = "موارد منع مصرف", content = it)
+                }
+
+                // عوارض جانبی
+                drugDetail.sideEffects?.let {
+                    InfoSectionCard(title = "عوارض جانبی", content = it)
+                }
+
+                // هشدارها
+                drugDetail.warnings?.let {
+                    InfoSectionCard(title = "هشدارها", content = it)
+                }
+
+                // توصیه‌های دارویی
+                drugDetail.recommendations?.let {
+                    InfoSectionCard(title = "توصیه‌های دارویی", content = it)
+                }
+            }
+
+            // اگر هیچ اطلاعاتی وجود نداشت
+            if (drugDetail.drugClass == null &&
+                drugDetail.therapeuticClass == null &&
+                drugDetail.pregnancyCategory == null &&
+                drugDetail.usage == null &&
+                drugDetail.contraindications == null &&
+                drugDetail.sideEffects == null &&
+                drugDetail.warnings == null &&
+                drugDetail.generalInfo.isNullOrBlank() &&
+                drugDetail.specializedInfo.isNullOrBlank()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "اطلاعات عمومی برای این دارو ثبت نشده است",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }  else {
+            // ========== صفحات برند (Brand) ==========
+            // نمایش اطلاعات تخصصی برند که در بخش brandAttrPersDesc است
+            drugDetail.usage?.let {
+                InfoSectionCard(title = "موارد مصرف", content = it)
+            }
+            drugDetail.contraindications?.let {
+                InfoSectionCard(title = "موارد منع مصرف", content = it)
+            }
+            drugDetail.sideEffects?.let {
+                InfoSectionCard(title = "عوارض جانبی", content = it)
+            }
+            drugDetail.warnings?.let {
+                InfoSectionCard(title = "هشدارها", content = it)
+            }
+            drugDetail.recommendations?.let {
+                InfoSectionCard(title = "توصیه‌های دارویی", content = it)
+            }
+
+            if (drugDetail.usage == null &&
+                drugDetail.contraindications == null &&
+                drugDetail.sideEffects == null &&
+                drugDetail.warnings == null
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "اطلاعات عمومی برای این برند ثبت نشده است.\nبرای مشاهده اطلاعات کامل، به صفحه داروی ژنریک مراجعه کنید.",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
+    }
+}
+
+
 @Composable
 fun SpecializedInfoTabContent(drugDetail: DrugDetail) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    val dime = LocalDime.current
+
+    Column(verticalArrangement = Arrangement.spacedBy(dime.md)) {
+
+        // برای صفحات برند، اطلاعات تخصصی معمولاً در قسمت brandAttrPersDesc است
+        // که در پارسر ما به صورت usage, contraindications, sideEffects, warnings, recommendations ذخیره شده
+
         drugDetail.usage?.let {
             InfoSectionCard(title = "موارد مصرف", content = it)
         }
@@ -347,10 +522,12 @@ fun SpecializedInfoTabContent(drugDetail: DrugDetail) {
             InfoSectionCard(title = "توصیه‌های دارویی", content = it)
         }
 
+        // اگر هیچ اطلاعات تخصصی وجود نداشت
         if (drugDetail.usage == null &&
             drugDetail.mechanism == null &&
             drugDetail.contraindications == null &&
-            drugDetail.sideEffects == null
+            drugDetail.sideEffects == null &&
+            drugDetail.warnings == null
         ) {
             Box(
                 modifier = Modifier
@@ -359,8 +536,11 @@ fun SpecializedInfoTabContent(drugDetail: DrugDetail) {
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "اطلاعات تخصصی برای این دارو ثبت نشده است",
-                    fontSize = 14.sp,
+                    text = if (drugDetail.isGeneric)
+                        "اطلاعات تخصصی برای این دارو ثبت نشده است"
+                    else
+                        "اطلاعات تخصصی برای این برند ثبت نشده است.\nبرای مشاهده اطلاعات کامل، به صفحه داروی ژنریک مراجعه کنید.",
+                    fontSize = 13.sp,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     textAlign = TextAlign.Center
                 )
@@ -370,8 +550,9 @@ fun SpecializedInfoTabContent(drugDetail: DrugDetail) {
 }
 
 @Composable
-fun DosageFormsTabContent(dosageForms: List<com.approagency.drug.domain.model.DosageForm>) {
+fun DosageFormsTabContent(drugDetail: DrugDetail) {
     val dime = LocalDime.current
+    val dosageForms = drugDetail.dosageForms
 
     if (dosageForms.isEmpty()) {
         Box(
@@ -381,18 +562,32 @@ fun DosageFormsTabContent(dosageForms: List<com.approagency.drug.domain.model.Do
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "اشکال دارویی برای این دارو ثبت نشده است",
-                fontSize = 14.sp,
+                text = if (drugDetail.isGeneric)
+                    "اشکال دارویی برای این دارو ثبت نشده است"
+                else
+                    "سایر اشکال دارویی این برند ثبت نشده است",
+                fontSize = 13.sp,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 textAlign = TextAlign.Center
             )
         }
     } else {
         Column(verticalArrangement = Arrangement.spacedBy(dime.sm)) {
+            // اگر صفحه برند است، عنوان متفاوت نشان بده
+            if (!drugDetail.isGeneric) {
+                Text(
+                    text = "سایر محصولات این برند",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = dime.xs)
+                )
+            }
+
             dosageForms.forEach { form ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
                     shape = RoundedCornerShape(dime.sm)
                 ) {
                     Column(
@@ -401,55 +596,49 @@ fun DosageFormsTabContent(dosageForms: List<com.approagency.drug.domain.model.Do
                     ) {
                         Text(
                             text = form.persianName,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 15.sp
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 14.sp
                         )
                         if (form.englishName.isNotBlank()) {
                             Text(
                                 text = form.englishName,
-                                fontSize = 12.sp,
+                                fontSize = 11.sp,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             )
                         }
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(dime.sm)
-                        ) {
-                            if (form.isHighRisk) {
-                                androidx.compose.material3.Surface(
-                                    shape = RoundedCornerShape(4.dp),
-                                    color = Color(0xFFFFEBEE),
-                                    modifier = Modifier.padding(vertical = 4.dp)
-                                ) {
-                                    Text(
-                                        text = "پرخطر",
-                                        fontSize = 10.sp,
-                                        color = Color(0xFFC62828),
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                                    )
+
+                        // نشانگرهای خطر
+                        if (form.isHighRisk || form.isVital) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(dime.xs)
+                            ) {
+                                if (form.isHighRisk) {
+                                    androidx.compose.material3.Surface(
+                                        shape = RoundedCornerShape(4.dp),
+                                        color = Color(0xFFFFEBEE)
+                                    ) {
+                                        Text(
+                                            text = "پرخطر",
+                                            fontSize = 10.sp,
+                                            color = Color(0xFFC62828),
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                        )
+                                    }
+                                }
+                                if (form.isVital) {
+                                    androidx.compose.material3.Surface(
+                                        shape = RoundedCornerShape(4.dp),
+                                        color = Color(0xFFE8F5E9)
+                                    ) {
+                                        Text(
+                                            text = "حیاتی",
+                                            fontSize = 10.sp,
+                                            color = Color(0xFF2E7D32),
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                        )
+                                    }
                                 }
                             }
-                            if (form.isVital) {
-                                androidx.compose.material3.Surface(
-                                    shape = RoundedCornerShape(4.dp),
-                                    color = Color(0xFFE8F5E9),
-                                    modifier = Modifier.padding(vertical = 4.dp)
-                                ) {
-                                    Text(
-                                        text = "حیاتی",
-                                        fontSize = 10.sp,
-                                        color = Color(0xFF2E7D32),
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                                    )
-                                }
-                            }
-                        }
-                        if (!form.warningLabel.isNullOrBlank()) {
-                            Text(
-                                text = "⚠️ ${form.warningLabel}",
-                                fontSize = 11.sp,
-                                color = Color(0xFFE65100),
-                                modifier = Modifier.padding(top = dime.xs)
-                            )
                         }
                     }
                 }
@@ -459,10 +648,10 @@ fun DosageFormsTabContent(dosageForms: List<com.approagency.drug.domain.model.Do
 }
 
 @Composable
-fun BrandNamesTabContent(brandNames: List<com.approagency.drug.domain.model.BrandName>) {
+fun BrandNamesTabContent(drugDetail: DrugDetail) {
     val dime = LocalDime.current
 
-    if (brandNames.isEmpty()) {
+    if (drugDetail.isGeneric && drugDetail.brandNames.isEmpty()) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -471,14 +660,14 @@ fun BrandNamesTabContent(brandNames: List<com.approagency.drug.domain.model.Bran
         ) {
             Text(
                 text = "اسامی تجاری برای این دارو ثبت نشده است",
-                fontSize = 14.sp,
+                fontSize = 13.sp,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 textAlign = TextAlign.Center
             )
         }
-    } else {
+    } else if (drugDetail.isGeneric && drugDetail.brandNames.isNotEmpty()) {
         Column(verticalArrangement = Arrangement.spacedBy(dime.sm)) {
-            brandNames.forEach { brand ->
+            drugDetail.brandNames.forEach { brand ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
@@ -525,6 +714,21 @@ fun BrandNamesTabContent(brandNames: List<com.approagency.drug.domain.model.Bran
                 }
             }
         }
+    } else {
+        // صفحه برند است - اسامی تجاری برای برند معنی ندارد
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(32.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "این صفحه مربوط به یک محصول تجاری است. برای مشاهده اسامی تجاری سایر برندها، به صفحه داروی ژنریک مراجعه کنید.",
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
 
@@ -548,14 +752,14 @@ fun InfoSectionCard(
             Text(
                 text = title,
                 fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
+                fontSize = 15.sp,
                 color = MaterialTheme.colorScheme.primary
             )
             Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
             Text(
                 text = content,
-                fontSize = 14.sp,
-                lineHeight = 22.sp,
+                fontSize = 13.sp,
+                lineHeight = 20.sp,
                 textAlign = TextAlign.Justify,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
             )

@@ -20,9 +20,19 @@ data class DrugDetail(
     val brandNames: List<BrandName>,
     val similarDrugs: List<SimilarDrug>,
     val categories: DrugCategories?,
-    val comments: List<Comment>
+    val comments: List<Comment>,
+    val manufacturer: String? = null,
+    val genericInfo: GenericInfo? = null,
+    val otherBrandForms: List<DosageForm> = emptyList(),
+    val isGeneric: Boolean = true,
+    val generalInfo: String? = null,
+    val specializedInfo: String? = null,
 )
-
+data class GenericInfo(
+    val genericId: String,
+    val persianName: String,
+    val detailUrl: String
+)
 data class DosageForm(
     val code: String,
     val persianName: String,
@@ -30,7 +40,8 @@ data class DosageForm(
     val isHighRisk: Boolean,
     val temperature: String?,
     val isVital: Boolean,
-    val warningLabel: String?
+    val warningLabel: String?,
+    val detailUrl: String? = null
 )
 
 data class BrandName(
