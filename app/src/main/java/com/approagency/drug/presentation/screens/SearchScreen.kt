@@ -88,7 +88,10 @@ fun SearchScreen(
             }
     }
 
-    Column(modifier = modifier.fillMaxSize().padding(dime.lg)) {
+    Column(modifier = modifier
+        .fillMaxSize()
+        .padding(horizontal = MaterialTheme.dime.md)
+        .padding(top = MaterialTheme.dime.md)) {
         // Search input
         CustomTextFilled(
             value = searchText,
@@ -117,13 +120,13 @@ fun SearchScreen(
             }
         )
 
-
+        Spacer(modifier = Modifier.height(MaterialTheme.dime.md))
         // Results area
         when (val currentState = state) {
             is SearchState.Loading -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        androidx.compose.material3.CircularProgressIndicator(
+                        CircularProgressIndicator(
                             color = MaterialTheme.colorScheme.primary
                         )
                         Text(
@@ -137,14 +140,15 @@ fun SearchScreen(
 
             is SearchState.LoadingMore -> {
                 // Show existing items with loading indicator at bottom
-                LazyColumn(state = lazyListState) {
+                LazyColumn(state = lazyListState , modifier = modifier.padding(vertical = MaterialTheme.dime.xs)) {
                     items(currentState.currentItems) { drug ->
                         DaroYabSearchResult(
                             drug = drug,
-                            onClick = { selectedDrug ->
+                            onClickDetail = { selectedDrug ->println(selectedDrug.detailPageUrl)
                                 // Navigate to drug detail
                                 // navController.navigate("drug_detail/${selectedDrug.genericId}")
-                            }
+                            },
+                            onClickDrugStore = {}
                         )
                     }
                     item {
@@ -161,10 +165,11 @@ fun SearchScreen(
                         items(currentState.drugs) { drug ->
                             DaroYabSearchResult(
                                 drug = drug,
-                                onClick = { selectedDrug ->
+                                onClickDetail = { selectedDrug -> println(selectedDrug.detailPageUrl)
                                     // Navigate to drug detail
                                     // navController.navigate("drug_detail/${selectedDrug.genericId}")
-                                }
+                                },
+                                onClickDrugStore = {}
                             )
                         }
 
