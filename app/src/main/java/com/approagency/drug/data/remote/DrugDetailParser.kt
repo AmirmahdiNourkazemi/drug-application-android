@@ -87,8 +87,9 @@ class DrugDetailParser {
     private fun extractPersianName(document: Document): String {
         val titleElement = document.select("h1.EnglishNumericFont").first()
         val fullText = titleElement?.text() ?: ""
-        // Remove the suffix "چیست و برای چه مواردی استفاده می شود؟"
-        return fullText.replace(Regex("\\s*چیست و برای چه مواردی استفاده می شود\\?\\s*"), "").trim()
+        val regexFullText = fullText.replace(Regex("\\s*چیست و برای چه مواردی استفاده می شود؟\\s*"), "").trim()
+        println("regexFullText: $regexFullText")
+        return regexFullText
     }
 
     private fun extractEnglishName(document: Document): String {

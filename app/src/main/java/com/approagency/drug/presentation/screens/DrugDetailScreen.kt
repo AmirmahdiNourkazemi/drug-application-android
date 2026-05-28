@@ -1,5 +1,6 @@
 package com.approagency.drug.presentation.screens
 
+import android.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -83,10 +84,8 @@ fun DrugDetailScreen(
                             is DrugDetailYabState.Success -> {
                                 Column {
                                     Text(
-                                        text = state.drugDetail.persianName.take(25),
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Medium,
-                                        maxLines = 1
+                                        text = state.drugDetail.persianName,
+                                        style = MaterialTheme.typography.titleMedium
                                     )
                                     if (state.drugDetail.englishName.isNotEmpty()) {
                                         Text(
