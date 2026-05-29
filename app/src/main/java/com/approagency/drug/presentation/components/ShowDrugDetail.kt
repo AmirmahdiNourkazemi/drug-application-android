@@ -115,7 +115,7 @@ fun DrugDetailSheet(
                             HorizontalDivider(Modifier.padding(vertical = MaterialTheme.dime.md))
                         }
 
-                        // --- 3. Usage & Mechanism xw
+                        // --- 3. Usage & Mechanism xw---
                         detail.mavaredmasraf?.let { usage ->
                             item {
                                 DetailSection(title = "موارد مصرف", content = usage)
