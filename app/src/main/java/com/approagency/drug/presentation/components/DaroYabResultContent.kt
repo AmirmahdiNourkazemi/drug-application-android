@@ -50,9 +50,7 @@ fun DaroYabSearchResult(
             ) {
                 Text(
                     text = drug.persianName,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.onSurface
+                    style = MaterialTheme.typography.labelLarge
                 )
                 drug.englishName?.let {
                     Text(
