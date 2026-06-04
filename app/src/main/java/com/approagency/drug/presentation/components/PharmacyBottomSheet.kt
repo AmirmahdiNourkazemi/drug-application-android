@@ -8,12 +8,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.approagency.drug.domain.model.PharmacyItem
+import com.approagency.drug.presentation.common.CustomBox
 import com.approagency.drug.presentation.common.CustomModalBottomSheet
 import com.approagency.drug.presentation.viewModel.PharmacyState
 import com.approagency.drug.presentation.viewModel.PharmacyViewModel
+import com.approagency.drug.utils.provinces
 import com.vada.caller.ui.theme.LocalDime
 import kotlinx.coroutines.launch
 
@@ -27,45 +31,10 @@ fun PharmacyBottomSheet(
 ) {
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true,
+        skipPartiallyExpanded = false,
         confirmValueChange = { true }
     )
 
-    // لیست استان‌ها (همان لیست HTML)
-    val provinces = listOf(
-        Province("0", "همه استان ها"),
-        Province("1", "اصفهان"),
-        Province("40", "تهران"),
-        Province("137", "آذربایجان شرقی"),
-        Province("138", "آذربایجان غربی"),
-        Province("139", "اردبیل"),
-        Province("140", "البرز"),
-        Province("141", "ایلام"),
-        Province("142", "بوشهر"),
-        Province("143", "چهارمحال و بختیاری"),
-        Province("144", "خراسان جنوبی"),
-        Province("145", "خراسان رضوی"),
-        Province("146", "خراسان شمالی"),
-        Province("147", "خوزستان"),
-        Province("148", "زنجان"),
-        Province("149", "سمنان"),
-        Province("150", "سیستان و بلوچستان"),
-        Province("151", "فارس"),
-        Province("152", "قزوین"),
-        Province("153", "قم"),
-        Province("154", "کردستان"),
-        Province("155", "کرمان"),
-        Province("156", "کرمانشاه"),
-        Province("157", "کهگیلویه و بویراحمد"),
-        Province("158", "گلستان"),
-        Province("159", "گیلان"),
-        Province("160", "لرستان"),
-        Province("161", "مازندران"),
-        Province("162", "مرکزی"),
-        Province("163", "هرمزگان"),
-        Province("164", "همدان"),
-        Province("165", "یزد")
-    )
 
     var selectedProvinceId by remember { mutableStateOf("40") } // پیش‌فرض تهران
     var showProvinceDropdown by remember { mutableStateOf(false) }
@@ -85,137 +54,140 @@ fun PharmacyBottomSheet(
             onDismiss = onDismiss,
             scope = scope
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // عنوان
-                Text(
-                    text = "جستجوی دارو در داروخانه‌ها",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = MaterialTheme.typography.titleMedium.fontSize
-                )
-
-                // انتخاب استان
-                ExposedDropdownMenuBox(
-                    expanded = showProvinceDropdown,
-                    onExpandedChange = { showProvinceDropdown = it }
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    OutlinedTextField(
-                        value = provinces.find { it.id == selectedProvinceId }?.name ?: "انتخاب استان",
-                        onValueChange = {},
-                        readOnly = true,
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = showProvinceDropdown) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor(),
-                        shape = MaterialTheme.shapes.small
+                    // عنوان
+                    Text(
+                        text = "جستجوی دارو در داروخانه‌ها",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = MaterialTheme.typography.titleMedium.fontSize
                     )
 
-                    ExposedDropdownMenu(
+                    // انتخاب استان
+                    ExposedDropdownMenuBox(
                         expanded = showProvinceDropdown,
-                        onDismissRequest = { showProvinceDropdown = false }
+                        onExpandedChange = { showProvinceDropdown = it }
                     ) {
-                        provinces.forEach { province ->
-                            DropdownMenuItem(
-                                text = { Text(province.name) },
-                                onClick = {
-                                    selectedProvinceId = province.id
-                                    showProvinceDropdown = false
-                                    // جستجو با استان جدید
-                                    viewModel.search(genericDrugId, province.id)
-                                }
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // نمایش نتایج
-                when (val state = pharmacyState) {
-                    PharmacyState.Loading -> {
-                        Box(
+                        OutlinedTextField(
+                            value = provinces.find { it.id == selectedProvinceId }?.name
+                                ?: "انتخاب استان",
+                            onValueChange = {},
+                            readOnly = true,
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = showProvinceDropdown) },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(200.dp),
-                            contentAlignment = Alignment.Center
+                                .menuAnchor(),
+                            shape = MaterialTheme.shapes.large
+                        )
+
+                        ExposedDropdownMenu(
+                            expanded = showProvinceDropdown,
+                            onDismissRequest = { showProvinceDropdown = false }
                         ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(32.dp)
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = "در حال جستجو...",
-                                    fontSize = MaterialTheme.typography.bodySmall.fontSize
+                            provinces.forEach { province ->
+                                DropdownMenuItem(
+                                    text = { Text(province.name) },
+                                    onClick = {
+                                        selectedProvinceId = province.id
+                                        showProvinceDropdown = false
+                                        // جستجو با استان جدید
+                                        viewModel.search(genericDrugId, province.id)
+                                    }
                                 )
                             }
                         }
                     }
 
-                    is PharmacyState.Success -> {
-                        if (state.items.isEmpty()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // نمایش نتایج
+                    when (val state = pharmacyState) {
+                        PharmacyState.Loading -> {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(200.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    text = "هیچ داروخانه‌ای یافت نشد",
-                                    fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                                )
-                            }
-                        } else {
-                            LazyColumn(
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                                modifier = Modifier.heightIn(max = 400.dp)
-                            ) {
-                                items(state.items) { pharmacy ->
-                                    PharmacyResultItem(pharmacy = pharmacy)
-                                }
-
-                                item {
-                                    Spacer(modifier = Modifier.height(16.dp))
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(32.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
                                     Text(
-                                        text = "تعداد کل: ${state.items.size} داروخانه",
-                                        fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                                        modifier = Modifier.padding(bottom = 8.dp)
+                                        text = "در حال جستجو...",
+                                        fontSize = MaterialTheme.typography.bodySmall.fontSize
                                     )
                                 }
                             }
                         }
-                    }
 
-                    is PharmacyState.Error -> {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(200.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(
-                                    text = state.message,
-                                    color = MaterialTheme.colorScheme.error,
-                                    fontSize = MaterialTheme.typography.bodyMedium.fontSize
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                TextButton(
-                                    onClick = { viewModel.retry() }
+                        is PharmacyState.Success -> {
+                            if (state.items.isEmpty()) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(200.dp),
+                                    contentAlignment = Alignment.Center
                                 ) {
-                                    Text("تلاش مجدد")
+                                    Text(
+                                        text = "هیچ داروخانه‌ای یافت نشد",
+                                        fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                    )
+                                }
+                            } else {
+                                LazyColumn(
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                    modifier = Modifier.weight(1f),
+                                ) {
+                                    items(state.items) { pharmacy ->
+                                        PharmacyResultItem(pharmacy = pharmacy)
+                                    }
+
+                                    item {
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Text(
+                                            text = "تعداد کل: ${state.items.size} داروخانه",
+                                            fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                            modifier = Modifier.padding(bottom = 8.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    PharmacyState.Idle -> {}
+                        is PharmacyState.Error -> {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        text = state.message,
+                                        color = MaterialTheme.colorScheme.error,
+                                        fontSize = MaterialTheme.typography.bodyMedium.fontSize
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    TextButton(
+                                        onClick = { viewModel.retry() }
+                                    ) {
+                                        Text("تلاش مجدد")
+                                    }
+                                }
+                            }
+                        }
+
+                        PharmacyState.Idle -> {}
+                    }
                 }
             }
         }
@@ -229,9 +201,8 @@ fun PharmacyResultItem(
 ) {
     val dime = LocalDime.current
 
-    Card(
+    CustomBox (
         modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(
             modifier = Modifier
@@ -242,7 +213,7 @@ fun PharmacyResultItem(
             // نام برند
             Text(
                 text = pharmacy.brandName,
-                fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                fontSize = MaterialTheme.typography.labelSmall.fontSize,
                 color = MaterialTheme.colorScheme.primary
             )
 
@@ -250,7 +221,7 @@ fun PharmacyResultItem(
             Text(
                 text = pharmacy.pharmacyName,
                 fontWeight = FontWeight.Bold,
-                fontSize = MaterialTheme.typography.bodyLarge.fontSize
+                fontSize = MaterialTheme.typography.labelLarge.fontSize
             )
 
             // موقعیت
@@ -262,8 +233,3 @@ fun PharmacyResultItem(
         }
     }
 }
-
-data class Province(
-    val id: String,
-    val name: String
-)
