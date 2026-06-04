@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.navigation.NavController
+import com.approagency.drug.domain.model.DrugSearchResult
 import com.approagency.drug.navigation.Screen
 import com.approagency.drug.presentation.common.CustomTextFilled
 import com.approagency.drug.presentation.common.EmptySearchState
@@ -33,7 +34,9 @@ import com.approagency.drug.presentation.common.LoadingMoreIndicator
 import com.approagency.drug.presentation.common.PrimaryButton
 import com.approagency.drug.presentation.components.DaroYabSearchResult
 import com.approagency.drug.presentation.components.DrugDetailBottomSheet
+import com.approagency.drug.presentation.components.PharmacyBottomSheet
 import com.approagency.drug.presentation.viewModel.DrugDetailViewModel
+import com.approagency.drug.presentation.viewModel.PharmacyViewModel
 import com.approgency.drug.presentation.viewModel.SearchState
 import com.approgency.drug.presentation.viewModel.SearchViewModel
 import com.vada.caller.ui.theme.LocalDime
@@ -46,7 +49,8 @@ fun SearchScreen(
     navController: NavController,
     modifier: Modifier = Modifier,
     viewModel: SearchViewModel = koinViewModel(),
-    drugDetailViewModel: DrugDetailViewModel = koinViewModel() // اضافه کنید
+    drugDetailViewModel: DrugDetailViewModel = koinViewModel(),
+    pharmacyViewModel: PharmacyViewModel = koinViewModel(),
 ) {
     val dime = LocalDime.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -54,6 +58,10 @@ fun SearchScreen(
     val state by viewModel.searchState.collectAsState()
     val lazyListState = rememberLazyListState()
     var selectedDrugUrl by remember { mutableStateOf<String?>(null) }
+
+    var showPharmacyBottomSheet by remember { mutableStateOf(false) }
+    var selectedDrugForPharmacy by remember { mutableStateOf<DrugSearchResult?>(null) }
+
     // Auto-search for testing (remove in production)
 //    LaunchedEffect(Unit) {
 //        if (searchText.isEmpty()) {
@@ -118,6 +126,22 @@ fun SearchScreen(
         )
 
         Spacer(modifier = Modifier.height(MaterialTheme.dime.md))
+
+        if (showPharmacyBottomSheet && selectedDrugForPharmacy != null) {
+            // استخراج genericDrugId از URL
+            // مثال: /G-799/Fexofenadine -> 799
+            val genericId = extractGenericIdFromUrl(selectedDrugForPharmacy?.detailPageUrl ?: "")
+
+            PharmacyBottomSheet(
+                viewModel = pharmacyViewModel,
+                genericDrugId = genericId,
+                isOpen = showPharmacyBottomSheet,
+                onDismiss = {
+                    showPharmacyBottomSheet = false
+                    selectedDrugForPharmacy = null
+                }
+            )
+        }
         // Results area
         when (val currentState = state) {
             is SearchState.Loading -> {
@@ -148,7 +172,10 @@ fun SearchScreen(
                                     )
                                 )
                             },
-                            onClickDrugStore = {}
+                            onClickDrugStore = { selectedDrug ->
+                                selectedDrugForPharmacy = selectedDrug
+                                showPharmacyBottomSheet = true
+                            }
                         )
                     }
                     item {
@@ -172,7 +199,10 @@ fun SearchScreen(
                                         )
                                     )
                                 },
-                                onClickDrugStore = {}
+                                onClickDrugStore = { selectedDrug ->
+                                    selectedDrugForPharmacy = selectedDrug
+                                    showPharmacyBottomSheet = true
+                                }
                             )
                         }
 
@@ -205,4 +235,10 @@ fun SearchScreen(
             }
         }
     }
+}
+
+// تابع کمکی برای استخراج ID از URL
+private fun extractGenericIdFromUrl(url: String): String {
+    val pattern = "/G-(\\d+)/".toRegex()
+    return pattern.find(url)?.groupValues?.get(1) ?: ""
 }

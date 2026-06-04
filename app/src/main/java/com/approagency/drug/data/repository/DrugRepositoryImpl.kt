@@ -7,11 +7,13 @@ import com.approagency.drug.data.remote.DarooyabApiService
 import com.approagency.drug.data.remote.DrugApiService
 import com.approagency.drug.data.remote.DrugDetailParser
 import com.approagency.drug.data.remote.DrugHtmlParser
+import com.approagency.drug.data.remote.PharmacyHtmlParser
 import com.approagency.drug.domain.model.DaroYabParams
 import com.approagency.drug.domain.model.DaroYabSearchResult
 import com.approagency.drug.domain.model.DrugDetail
 import com.approagency.drug.domain.model.DrugSearchParams
 import com.approagency.drug.domain.model.DrugSearchResult
+import com.approagency.drug.domain.model.PharmacyItem
 import com.approagency.drug.domain.repository.DrugRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -86,6 +88,25 @@ class DrugRepositoryImpl(
                 Result.success(detail)
             } catch (e: Exception) {
                 Result.failure(e)
+            }
+        }
+    }
+
+    override suspend fun searchPharmacies(
+        genericDrugId: String,
+        provId: String
+    ): List<PharmacyItem> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val html = darooyabApiService.getPharmacies(
+                    brandIrc = "0",
+                    genericDrugId = genericDrugId,
+                    provId = provId,
+                    cityId = "0"
+                )
+                PharmacyHtmlParser.parse(html)
+            } catch (e: Exception) {
+                emptyList()
             }
         }
     }

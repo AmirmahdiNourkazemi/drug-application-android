@@ -14,6 +14,7 @@ import com.approagency.drug.domain.usecase.DrugDetailYabUseCase
 import com.approagency.drug.domain.usecase.GetDarmanUseCase
 import com.approagency.drug.domain.usecase.GetDrugDetailUseCase
 import com.approagency.drug.domain.usecase.GetDrugSearchUseCase
+import com.approagency.drug.domain.usecase.GetPharmaciesUseCase
 import com.approagency.drug.domain.usecase.GetTestGroupUseCase
 import com.approagency.drug.domain.usecase.GetTestItemByGroupId
 import com.approagency.drug.domain.usecase.SearchDrugsYabUseCase
@@ -21,6 +22,7 @@ import com.approagency.drug.domain.usecase.SearchTestsUseCase
 import com.approagency.drug.presentation.viewModel.DrugDetailViewModel
 import com.approagency.drug.presentation.viewModel.HomeViewModel
 import com.approagency.drug.presentation.viewModel.LabViewModel
+import com.approagency.drug.presentation.viewModel.PharmacyViewModel
 import com.approagency.drug.utils.Config
 import com.approgency.drug.presentation.viewModel.SearchViewModel
 import okhttp3.OkHttpClient
@@ -120,6 +122,10 @@ val appModule= module {
     }
 
     single {
+        GetPharmaciesUseCase(get())
+    }
+
+    single {
         GetTestItemByGroupId(get())
     }
 
@@ -141,6 +147,9 @@ val appModule= module {
 
     viewModel {
         SearchViewModel(get())
+    }
+    viewModel {
+        PharmacyViewModel(get())
     }
 
     viewModel {

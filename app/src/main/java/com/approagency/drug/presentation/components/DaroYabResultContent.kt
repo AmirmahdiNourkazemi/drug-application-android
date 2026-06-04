@@ -27,7 +27,7 @@ import com.vada.caller.ui.theme.dime
 fun DaroYabSearchResult(
     drug: DrugSearchResult,
     onClickDetail: (DrugSearchResult) -> Unit,
-    onClickDrugStore:() ->Unit,
+    onClickDrugStore:(DrugSearchResult) ->Unit,
     modifier: Modifier = Modifier
 ) {
     val dime = LocalDime.current
@@ -71,7 +71,7 @@ fun DaroYabSearchResult(
                    TextButton(onClick = {onClickDetail(drug)} , content = {
                        Text("اطلاعات دارویی")
                    })
-                   TextButton(onClick = {onClickDetail(drug)} , content = {
+                   TextButton(onClick = {onClickDrugStore(drug)} , content = {
                        Text("موجودی داروخانه")
                    })
                }

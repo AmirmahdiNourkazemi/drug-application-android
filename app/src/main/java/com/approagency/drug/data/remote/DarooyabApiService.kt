@@ -32,4 +32,20 @@ interface DarooyabApiService {
     suspend fun getDrugDetail(
         @Path(value = "detailUrl", encoded = true) detailUrl: String
     ): String
+
+
+    @POST("Home/partialPatientReferralList")
+    @FormUrlEncoded
+    @Headers(
+        "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36",
+        "X-Requested-With: XMLHttpRequest",
+        "Accept: */*",
+        "Accept-Language: en-US,en;q=0.9,fa;q=0.8"
+    )
+    suspend fun getPharmacies(
+        @Field("brandIrc") brandIrc: String,
+        @Field("genericDrugId") genericDrugId: String,
+        @Field("provId") provId: String,
+        @Field("cityId") cityId: String
+    ): String  // returns HTML
 }

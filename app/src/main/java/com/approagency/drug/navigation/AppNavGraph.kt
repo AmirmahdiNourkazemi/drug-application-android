@@ -6,7 +6,6 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.approagency.drug.presentation.screens.DrugDetailScreen
@@ -36,7 +35,7 @@ fun AppNavGraph() {
 
         composable("search") {
             MainContainer(navController) {
-                SearchScreen(navController)
+                SearchScreen(navController,)
             }
         }
 
