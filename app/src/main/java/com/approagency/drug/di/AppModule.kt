@@ -15,6 +15,7 @@ import com.approagency.drug.domain.usecase.GetDarmanUseCase
 import com.approagency.drug.domain.usecase.GetDrugDetailUseCase
 import com.approagency.drug.domain.usecase.GetDrugSearchUseCase
 import com.approagency.drug.domain.usecase.GetPharmaciesUseCase
+import com.approagency.drug.domain.usecase.GetPharmacyDetailUseCase
 import com.approagency.drug.domain.usecase.GetTestGroupUseCase
 import com.approagency.drug.domain.usecase.GetTestItemByGroupId
 import com.approagency.drug.domain.usecase.SearchDrugsYabUseCase
@@ -135,6 +136,10 @@ val appModule= module {
         DrugDetailYabUseCase(get())
     }
 
+    single {
+        GetPharmacyDetailUseCase(get())
+    }
+
     viewModel {
         DrugDetailViewModel(get())
     }
@@ -149,7 +154,7 @@ val appModule= module {
         SearchViewModel(get())
     }
     viewModel {
-        PharmacyViewModel(get())
+        PharmacyViewModel(get() , get ())
     }
 
     viewModel {

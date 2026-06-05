@@ -13,6 +13,7 @@ import com.approagency.drug.domain.model.DaroYabSearchResult
 import com.approagency.drug.domain.model.DrugDetail
 import com.approagency.drug.domain.model.DrugSearchParams
 import com.approagency.drug.domain.model.DrugSearchResult
+import com.approagency.drug.domain.model.PharmacyDetail
 import com.approagency.drug.domain.model.PharmacyItem
 import com.approagency.drug.domain.repository.DrugRepository
 import kotlinx.coroutines.Dispatchers
@@ -107,6 +108,17 @@ class DrugRepositoryImpl(
                 PharmacyHtmlParser.parse(html)
             } catch (e: Exception) {
                 emptyList()
+            }
+        }
+    }
+
+    override suspend fun getPharmacyDetail(pharmacyUrl: String): PharmacyDetail {
+        return withContext(Dispatchers.IO) {
+            try {
+                val html = darooyabApiService.getPharmacyDetail(pharmacyUrl)
+                PharmacyHtmlParser.parsePharmacyDetail(html)
+            } catch (e: Exception) {
+                PharmacyDetail("", "", "")
             }
         }
     }

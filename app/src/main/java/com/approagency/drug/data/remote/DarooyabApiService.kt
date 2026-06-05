@@ -7,6 +7,7 @@ import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
+import retrofit2.http.Url
 
 interface DarooyabApiService {
     @FormUrlEncoded
@@ -33,7 +34,16 @@ interface DarooyabApiService {
         @Path(value = "detailUrl", encoded = true) detailUrl: String
     ): String
 
-
+    @GET
+    @Headers(
+        "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Accept: text/html,application/xhtml+xml,application/xml;q=0.9",
+        "Accept-Language: en-US,en;q=0.9,fa;q=0.8"
+    )
+//    @GET("{pharmacyPath}")
+    suspend fun getPharmacyDetail(
+        @Url url: String
+    ): String
     @POST("Home/partialPatientReferralList")
     @FormUrlEncoded
     @Headers(

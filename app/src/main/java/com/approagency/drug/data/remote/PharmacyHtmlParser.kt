@@ -1,9 +1,13 @@
+// data/remote/PharmacyHtmlParser.kt
 package com.approagency.drug.data.remote
 
+import com.approagency.drug.domain.model.PharmacyDetail
 import com.approagency.drug.domain.model.PharmacyItem
 import org.jsoup.Jsoup
 
 object PharmacyHtmlParser {
+
+//    private const val BASE_URL = "https://www.darooyab.ir"
 
     fun parse(html: String): List<PharmacyItem> {
         val items = mutableListOf<PharmacyItem>()
@@ -28,7 +32,7 @@ object PharmacyHtmlParser {
             val brandCell = cells[brandIndex]
             val brandLink = brandCell.select("a").first()
             val brandName = brandLink?.text()?.trim() ?: ""
-            val brandUrl = brandLink?.attr("href")?.trim() ?: ""
+            val brandUrl = normalizeUrl(brandLink?.attr("href")?.trim() ?: "")
             val brandId = extractIdFromUrl(brandUrl, "/B-(\\d+)/?")
 
             // ستون داروخانه
@@ -40,7 +44,10 @@ object PharmacyHtmlParser {
                 !it.text().contains("اطلاعات تماس")
             }
             val pharmacyName = pharmacyLink?.text()?.trim() ?: ""
-            val pharmacyUrl = pharmacyLink?.attr("href")?.trim() ?: ""
+            var pharmacyUrl = pharmacyLink?.attr("href")?.trim() ?: ""
+
+            // نرمال کردن URL داروخانه
+            pharmacyUrl = normalizeUrl(pharmacyUrl)
             val pharmacyId = extractIdFromUrl(pharmacyUrl, "/ph-(\\d+)/?")
 
             // ستون موقعیت
@@ -68,6 +75,37 @@ object PharmacyHtmlParser {
         }
 
         return items
+    }
+
+    /**
+     * نرمال کردن URL: تبدیل مسیرهای نسبی به URL کامل
+     * مثال: ~/../../../../../ph-12012/... -> https://www.darooyab.ir/ph-12012/...
+     */
+    private fun normalizeUrl(url: String): String {
+        if (url.isBlank()) return ""
+
+        // اگر absolute بود domain را حذف کن
+        if (url.startsWith("http://") || url.startsWith("https://")) {
+            return url
+                .replace("https://www.darooyab.ir", "")
+                .replace("http://www.darooyab.ir", "")
+        }
+
+        var cleanUrl = url
+
+        if (cleanUrl.startsWith("~/")) {
+            cleanUrl = cleanUrl.removePrefix("~/")
+        }
+
+        while (cleanUrl.startsWith("../")) {
+            cleanUrl = cleanUrl.removePrefix("../")
+        }
+
+        return if (cleanUrl.startsWith("/")) {
+            cleanUrl
+        } else {
+            "/$cleanUrl"
+        }
     }
 
     /**
@@ -99,5 +137,30 @@ object PharmacyHtmlParser {
     private fun extractIdFromUrl(url: String, pattern: String): String {
         val regex = pattern.toRegex()
         return regex.find(url)?.groupValues?.get(1) ?: ""
+    }
+
+    fun parsePharmacyDetail(html: String): PharmacyDetail {
+        val doc = Jsoup.parse(html)
+
+        // استخراج نام داروخانه
+        val pharmacyTitle = doc.select("h2#pharmacyTitle").first()?.text()?.trim() ?: ""
+
+        // استخراج آدرس
+        val addressElement = doc.select("h2#h2Address").first()
+        val address = addressElement?.text()?.trim() ?: ""
+
+        // استخراج تلفن
+        val phoneElement = doc.select("h3#h3Phone a").first()
+        val phone = phoneElement?.text()?.trim() ?: ""
+
+        // استخراج دانشگاه (اختیاری)
+        val university = doc.select("div.alert.alert-success > span").first()?.text()?.trim()
+
+        return PharmacyDetail(
+            name = pharmacyTitle,
+            address = address,
+            phone = phone,
+            university = university
+        )
     }
 }

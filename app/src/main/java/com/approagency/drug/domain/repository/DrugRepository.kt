@@ -8,6 +8,7 @@ import com.approagency.drug.domain.model.DaroYabSearchResult
 import com.approagency.drug.domain.model.DrugDetail
 import com.approagency.drug.domain.model.DrugSearchParams
 import com.approagency.drug.domain.model.DrugSearchResult
+import com.approagency.drug.domain.model.PharmacyDetail
 import com.approagency.drug.domain.model.PharmacyItem
 
 interface DrugRepository {
@@ -17,5 +18,7 @@ interface DrugRepository {
     suspend fun searchDrugs(params:DaroYabParams):Result<DaroYabSearchResult>
     suspend fun getDrugDetailFromYab(detailUrl: String):Result<DrugDetail>
     suspend fun searchPharmacies(genericDrugId: String,provId: String): List<PharmacyItem>
+
+    suspend fun getPharmacyDetail(pharmacyUrl: String): PharmacyDetail
 
 }
