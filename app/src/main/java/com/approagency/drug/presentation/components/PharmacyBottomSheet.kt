@@ -280,7 +280,6 @@ fun PharmacyResultItem(
                 }
             }
             if (showDetails) {
-                Divider(modifier = Modifier.padding(vertical = 4.dp))
 
                 when (detailState) {
                     is PharmacyDetailState.Loading -> {
@@ -296,6 +295,7 @@ fun PharmacyResultItem(
                         Column(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
+                            HorizontalDivider(modifier = Modifier.padding(vertical = MaterialTheme.dime.xs))
                             // آدرس
                             Row(
                                 verticalAlignment = Alignment.Top,
@@ -333,14 +333,6 @@ fun PharmacyResultItem(
                                     )
                                 }
                             }
-
-                            // هشدار (اطلاعات از HTML)
-                            Text(
-                                text = "⚠️ دریافت دارو فقط با نسخه کامل و بصورت حضوری در محل داروخانه امکان پذیر است",
-                                fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                                color = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.padding(top = 4.dp)
-                            )
                         }
                     }
 
@@ -355,14 +347,6 @@ fun PharmacyResultItem(
                     else -> {}
                 }
             }
-
-
-
-            Text(
-                text = "${pharmacy.pharmacyUrl}",
-                fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
         }
     }
 }
