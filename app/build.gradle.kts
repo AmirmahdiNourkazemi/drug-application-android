@@ -93,4 +93,7 @@ dependencies {
     implementation(libs.jsoup)
 
     implementation(libs.retrofit.scalars)
+
+
+    implementation(libs.androidx.compose.material.icons.extended)
 }

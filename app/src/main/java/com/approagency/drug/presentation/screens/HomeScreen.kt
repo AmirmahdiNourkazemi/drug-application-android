@@ -140,32 +140,32 @@ fun HomeContent(
         Column  (
             verticalArrangement = Arrangement.Center
         ){
-            CustomTextFilled(
-                value = searchText,
-                onValueChange = { searchText = it },
-                onSearch = { query ->
-                    if (query.isNotBlank()) {
-                        onSearch(query)
-                    }
-                },
-                placeholder = "جستجوی دارو",
-                showClearButton = true,
-                showSearchButton = true,
-                autoSearch = false, // Set to true if you want search while typing
-                height = 45
-            )
-            Spacer(modifier = Modifier.height(MaterialTheme.dime.xs))
-            PrimaryButton(
-                text = "جستجو",
-                height = 40,
-                isLoading = state.drugSearchState.isLoading,
-                onClick = {
-                    if (searchText.isNotBlank()) {
-                        onSearch(searchText)
-                    }
-                }
-            )
-            Spacer(modifier = Modifier.height(MaterialTheme.dime.xs))
+//            CustomTextFilled(
+//                value = searchText,
+//                onValueChange = { searchText = it },
+//                onSearch = { query ->
+//                    if (query.isNotBlank()) {
+//                        onSearch(query)
+//                    }
+//                },
+//                placeholder = "جستجوی دارو",
+//                showClearButton = true,
+//                showSearchButton = true,
+//                autoSearch = false, // Set to true if you want search while typing
+//                height = 45
+//            )
+//            Spacer(modifier = Modifier.height(MaterialTheme.dime.xs))
+//            PrimaryButton(
+//                text = "جستجو",
+//                height = 40,
+//                isLoading = state.drugSearchState.isLoading,
+//                onClick = {
+//                    if (searchText.isNotBlank()) {
+//                        onSearch(searchText)
+//                    }
+//                }
+//            )
+//            Spacer(modifier = Modifier.height(MaterialTheme.dime.xs))
             Box(modifier = Modifier.fillMaxSize()) {
 
                 // Always draw the data if available

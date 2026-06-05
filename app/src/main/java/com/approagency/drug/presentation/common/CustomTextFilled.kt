@@ -47,7 +47,7 @@ fun CustomTextFilled(
     showClearButton: Boolean = true,
     showSearchButton: Boolean = true,
     autoSearch: Boolean = false,
-    searchDelay: Long = 500L,
+    searchDelay: Long = 1200L,
     keyboardOptions: KeyboardOptions = KeyboardOptions(
         imeAction = ImeAction.Search
     ),

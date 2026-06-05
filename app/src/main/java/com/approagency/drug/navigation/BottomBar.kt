@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.LocalPharmacy
+import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.Icon
@@ -42,9 +44,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 fun BottomBar(navController: NavHostController) {
 
     val items = listOf(
-        Triple("home", "دارو", Icons.Default.Search),
-        Triple("search", "سرچ", Icons.Rounded.Refresh),
-        Triple("lab", "آزمایش", Icons.Default.Build)
+        Triple("home", "عمومی", Icons.Filled.LocalPharmacy),
+        Triple("search", "جستجو",Icons.Filled.Search),
+        Triple("lab", "آزمایش", Icons.Filled.Science)
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()

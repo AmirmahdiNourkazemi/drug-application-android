@@ -110,7 +110,7 @@ fun SearchScreen(
             placeholder = "جستجوی دارو",
             showClearButton = true,
             showSearchButton = true,
-            autoSearch = false,
+            autoSearch = true,
             height = 45
         )
         Spacer(modifier = Modifier.height(MaterialTheme.dime.xs))
