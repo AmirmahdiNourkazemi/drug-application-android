@@ -1,0 +1,244 @@
+package com.approagency.pharmacy.presentation.screens
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.navigation.NavController
+import com.approagency.pharmacy.domain.model.DrugSearchResult
+import com.approagency.pharmacy.navigation.Screen
+import com.approagency.pharmacy.presentation.common.CustomTextFilled
+import com.approagency.pharmacy.presentation.common.EmptySearchState
+import com.approagency.pharmacy.presentation.common.EndOfListIndicator
+import com.approagency.pharmacy.presentation.common.ErrorState
+import com.approagency.pharmacy.presentation.common.LoadingMoreIndicator
+import com.approagency.pharmacy.presentation.common.PrimaryButton
+import com.approagency.pharmacy.presentation.components.DaroYabSearchResult
+import com.approagency.pharmacy.presentation.components.DrugDetailBottomSheet
+import com.approagency.pharmacy.presentation.components.PharmacyBottomSheet
+import com.approagency.pharmacy.presentation.viewModel.DrugDetailViewModel
+import com.approagency.pharmacy.presentation.viewModel.PharmacyViewModel
+import com.approgency.drug.presentation.viewModel.SearchState
+import com.approgency.drug.presentation.viewModel.SearchViewModel
+import com.vada.caller.ui.theme.LocalDime
+import com.vada.caller.ui.theme.dime
+import org.koin.androidx.compose.koinViewModel
+
+
+@Composable
+fun SearchScreen(
+    navController: NavController,
+    modifier: Modifier = Modifier,
+    viewModel: SearchViewModel = koinViewModel(),
+    drugDetailViewModel: DrugDetailViewModel = koinViewModel(),
+    pharmacyViewModel: PharmacyViewModel = koinViewModel(),
+) {
+    val dime = LocalDime.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val searchText = viewModel.searchText
+    val state by viewModel.searchState.collectAsState()
+    val lazyListState = rememberLazyListState()
+    var selectedDrugUrl by remember { mutableStateOf<String?>(null) }
+
+    var showPharmacyBottomSheet by remember { mutableStateOf(false) }
+    var selectedDrugForPharmacy by remember { mutableStateOf<DrugSearchResult?>(null) }
+
+    // Auto-search for testing (remove in production)
+//    LaunchedEffect(Unit) {
+//        if (searchText.isEmpty()) {
+//            searchText = "انتی"
+//            viewModel.searchDrugs(searchText)
+//        }
+//    }
+    if (selectedDrugUrl != null) {
+        DrugDetailBottomSheet(
+            detailUrl = selectedDrugUrl,
+            onDismiss = { selectedDrugUrl = null },
+            viewModel = drugDetailViewModel
+        )
+    }
+    // Detect when user scrolls to the bottom to load more
+    LaunchedEffect(lazyListState) {
+        snapshotFlow { lazyListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
+            .collect { lastVisibleIndex ->
+                if (lastVisibleIndex != null && state is SearchState.Success) {
+                    val successState = state as SearchState.Success
+                    val totalItems = successState.drugs.size
+                    // Load more when user is 3 items from the end
+                    if (lastVisibleIndex >= totalItems - 3 &&
+                        successState.hasMorePages &&
+                        !successState.isLoadingMore) {
+                        viewModel.loadNextPage()
+                    }
+                }
+            }
+    }
+
+    Column(modifier = modifier
+        .fillMaxSize()
+        .padding(horizontal = MaterialTheme.dime.md)
+        .padding(top = MaterialTheme.dime.md)) {
+        // Search input
+        CustomTextFilled(
+            value = searchText,
+            onValueChange = { viewModel.updateSearchText(it) },
+            onSearch = { query ->
+                if (query.isNotBlank()) {
+                    keyboardController?.hide()
+                    viewModel.searchDrugs(searchText)
+                }
+            },
+            placeholder = "جستجوی دارو",
+            showClearButton = true,
+            showSearchButton = true,
+            autoSearch = true,
+            height = 45
+        )
+        Spacer(modifier = Modifier.height(MaterialTheme.dime.xs))
+        PrimaryButton(
+            text = "جستجو",
+            height = 40,
+            isLoading = state is SearchState.Loading,
+            onClick = {
+                if (searchText.isNotBlank()) {
+                    viewModel.searchDrugs(searchText)
+                }
+            }
+        )
+
+        Spacer(modifier = Modifier.height(MaterialTheme.dime.md))
+
+        if (showPharmacyBottomSheet && selectedDrugForPharmacy != null) {
+            // استخراج genericDrugId از URL
+            // مثال: /G-799/Fexofenadine -> 799
+            val genericId = extractGenericIdFromUrl(selectedDrugForPharmacy?.detailPageUrl ?: "")
+
+            PharmacyBottomSheet(
+                viewModel = pharmacyViewModel,
+                genericDrugId = genericId,
+                isOpen = showPharmacyBottomSheet,
+                onDismiss = {
+                    showPharmacyBottomSheet = false
+                    selectedDrugForPharmacy = null
+                }
+            )
+        }
+        // Results area
+        when (val currentState = state) {
+            is SearchState.Loading -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "در حال جستجو...",
+                            modifier = Modifier.padding(top = dime.md),
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+            }
+
+            is SearchState.LoadingMore -> {
+                // Show existing items with loading indicator at bottom
+                LazyColumn(state = lazyListState , modifier = modifier.padding(vertical = MaterialTheme.dime.xs)) {
+                    items(currentState.currentItems) { drug ->
+                        DaroYabSearchResult(
+                            drug = drug,
+                            onClickDetail = { selectedDrug ->
+                                navController.navigate(
+                                    Screen.DrugDetail.createRoute(
+                                        selectedDrug.detailPageUrl
+                                    )
+                                )
+                            },
+                            onClickDrugStore = { selectedDrug ->
+                                selectedDrugForPharmacy = selectedDrug
+                                showPharmacyBottomSheet = true
+                            }
+                        )
+                    }
+                    item {
+                        LoadingMoreIndicator()
+                    }
+                }
+            }
+
+            is SearchState.Success -> {
+                if (currentState.drugs.isEmpty()) {
+                    EmptySearchState(onRetry = { viewModel.retryLastSearch() })
+                } else {
+                    LazyColumn(state = lazyListState) {
+                        items(currentState.drugs) { drug ->
+                            DaroYabSearchResult(
+                                drug = drug,
+                                onClickDetail = { selectedDrug ->
+                                    navController.navigate(
+                                        Screen.DrugDetail.createRoute(
+                                            selectedDrug.detailPageUrl
+                                        )
+                                    )
+                                },
+                                onClickDrugStore = { selectedDrug ->
+                                    selectedDrugForPharmacy = selectedDrug
+                                    showPharmacyBottomSheet = true
+                                }
+                            )
+                        }
+
+                        // Show loading indicator at bottom when loading more
+                        if (currentState.isLoadingMore) {
+                            item {
+                                LoadingMoreIndicator()
+                            }
+                        }
+
+                        // Show end of list indicator
+                        if (!currentState.hasMorePages && currentState.drugs.isNotEmpty()) {
+                            item {
+                                EndOfListIndicator()
+                            }
+                        }
+                    }
+                }
+            }
+
+            is SearchState.Error -> {
+                ErrorState(
+                    message = currentState.message,
+                    onRetry = { viewModel.retryLastSearch() }
+                )
+            }
+
+            SearchState.Idle -> {
+                EmptySearchState(onRetry = {})
+            }
+        }
+    }
+}
+
+// تابع کمکی برای استخراج ID از URL
+private fun extractGenericIdFromUrl(url: String): String {
+    val pattern = "/G-(\\d+)/".toRegex()
+    return pattern.find(url)?.groupValues?.get(1) ?: ""
+}

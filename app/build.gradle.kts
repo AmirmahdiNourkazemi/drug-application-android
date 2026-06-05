@@ -6,13 +6,13 @@ plugins {
 }
 
 android {
-    namespace = "com.approagency.drug"
+    namespace = "com.approagency.pharmacy"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "com.approagency.drug"
+        applicationId = "com.approagency.pharmacy"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
@@ -23,7 +23,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
