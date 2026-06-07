@@ -70,9 +70,20 @@ fun CustomTextFilled(
     var isFocused by remember { mutableStateOf(false) }
     var localValue by remember(value) { mutableStateOf(value) }
 
+    // با بازگشت از صفحه‌ی دیگر (مثل جزئیات دارو) یا ترکیب‌مجدد/چرخش صفحه،
+    // این کامپوزبل دوباره ساخته می‌شود و LaunchedEffect از نو اجرا می‌گردد.
+    // اجرای اول مربوط به مقدار اولیه/بازیابی‌شده است و نباید جستجوی خودکار را
+    // تریگر کند؛ فقط تغییرات واقعی متن توسط کاربر باید debounce و جستجو شوند.
+    var isInitialAutoSearch by remember { mutableStateOf(true) }
+
     // Auto-search functionality
     androidx.compose.runtime.LaunchedEffect(autoSearch, searchDelay, localValue) {
-        if (autoSearch && localValue.isNotBlank()) {
+        if (!autoSearch) return@LaunchedEffect
+        if (isInitialAutoSearch) {
+            isInitialAutoSearch = false
+            return@LaunchedEffect
+        }
+        if (localValue.isNotBlank()) {
             kotlinx.coroutines.delay(searchDelay)
             onSearch(localValue)
         }
