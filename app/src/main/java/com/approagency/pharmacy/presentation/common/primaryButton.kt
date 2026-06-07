@@ -8,7 +8,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -24,13 +23,17 @@ fun PrimaryButton(
             contentColor = MaterialTheme.colorScheme.onPrimary
         ),
         shape = MaterialTheme.shapes.medium,
-        modifier = Modifier.fillMaxWidth().height(height?.dp ?: 50.dp),
-        onClick = {
-            onClick()
-        },
+        enabled = isLoading != true,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(height?.dp ?: 50.dp),
+        onClick = onClick,
     ) {
         if (isLoading == true) {
-          Text("... در حال جستجو" , textAlign = TextAlign.Right)
+            Loading(
+                size = 22.dp,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
         } else {
             Text(text)
         }

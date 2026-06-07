@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.vada.caller.ui.theme.dime
 
 @Composable
 fun PaginationControls(
@@ -32,7 +34,7 @@ fun PaginationControls(
     if (totalPages <= 1) return
 
     Row(
-        modifier = modifier.padding(vertical = 16.dp),
+        modifier = modifier.padding(vertical = MaterialTheme.dime.lg),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -49,7 +51,7 @@ fun PaginationControls(
         if (pageRange.first > 1) {
             PageNumberButton(page = 1, isSelected = false, onClick = onPageSelected)
             if (pageRange.first > 2) {
-                Text("...", modifier = Modifier.padding(horizontal = 4.dp))
+                Text("...", modifier = Modifier.padding(horizontal = MaterialTheme.dime.xs))
             }
         }
 
@@ -63,7 +65,7 @@ fun PaginationControls(
 
         if (pageRange.last < totalPages) {
             if (pageRange.last < totalPages - 1) {
-                Text("...", modifier = Modifier.padding(horizontal = 4.dp))
+                Text("...", modifier = Modifier.padding(horizontal = MaterialTheme.dime.xs))
             }
             PageNumberButton(page = totalPages, isSelected = false, onClick = onPageSelected)
         }
@@ -89,11 +91,11 @@ private fun PageNumberButton(
     Text(
         text = page.toString(),
         modifier = Modifier
-            .padding(horizontal = 4.dp)
+            .padding(horizontal = MaterialTheme.dime.xs)
             .clip(RoundedCornerShape(4.dp))
             .background(backgroundColor)
             .clickable { onClick(page) }
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .padding(horizontal = MaterialTheme.dime.md, vertical = MaterialTheme.dime.sm),
         color = textColor,
         fontSize = 14.sp
     )
@@ -115,7 +117,7 @@ private fun PaginationButton(
             .size(36.dp)
             .clip(RoundedCornerShape(4.dp))
             .then(if (enabled) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(8.dp),
+            .padding(MaterialTheme.dime.sm),
         tint = color
     )
 }

@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +34,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.approagency.pharmacy.domain.model.DrugDetail
 import com.approagency.pharmacy.presentation.common.CustomModalBottomSheet
 import com.approagency.pharmacy.presentation.common.ErrorState
+import com.approagency.pharmacy.presentation.common.Loading
 import com.approagency.pharmacy.presentation.viewModel.DrugDetailViewModel
 import com.approagency.pharmacy.presentation.viewModel.DrugDetailYabState
 import com.vada.caller.ui.theme.LocalDime
@@ -80,24 +80,13 @@ fun DrugDetailBottomSheet(
                     }
 
                     DrugDetailYabState.Loading -> {
-                        Box(
+                        Loading(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(400.dp)
                                 .padding(dime.xl),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                CircularProgressIndicator(
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                                Spacer(modifier = Modifier.height(dime.md))
-                                Text(
-                                    text = "در حال دریافت اطلاعات دارو...",
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                                )
-                            }
-                        }
+                            message = "در حال دریافت اطلاعات دارو..."
+                        )
                     }
 
                     is DrugDetailYabState.Success -> {
@@ -197,7 +186,7 @@ fun DrugDetailContent(
                         }
                     }
                     drugDetail.therapeuticClass?.let {
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(dime.xs))
                         Row {
                             Text(
                                 text = "طبقه درمانی: ",

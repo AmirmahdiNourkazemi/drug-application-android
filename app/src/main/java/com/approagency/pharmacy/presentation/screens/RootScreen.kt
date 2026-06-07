@@ -41,6 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.vada.caller.ui.theme.dime
 @SuppressLint("ConfigurationScreenWidthHeight")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,7 +73,7 @@ fun RootScreen(navHostController: NavHostController, modifier: Modifier){
                 containerColor = MaterialTheme.colorScheme.surface,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(110.dp).padding(bottom = 2.dp).clip(MaterialTheme.shapes.extraLarge),
+                    .height(110.dp).padding(bottom = MaterialTheme.dime.xxs).clip(MaterialTheme.shapes.extraLarge),
                 tonalElevation = 8.dp, // subtle shadow
                 windowInsets = WindowInsets.navigationBars
                     .only(WindowInsetsSides.Bottom)

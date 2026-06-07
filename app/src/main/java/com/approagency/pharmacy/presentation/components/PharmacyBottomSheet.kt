@@ -114,23 +114,13 @@ fun PharmacyBottomSheet(
                     when (val state = pharmacyState) {
                         PharmacyState.Loading -> {
                             item {
-                                Box(
+                                Loading(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .height(400.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                        Loading()
-                                        Spacer(modifier = Modifier.height(MaterialTheme.dime.xl))
-                                        Text(
-                                            text = "در حال جستجو...",
-                                            fontSize = MaterialTheme.typography.bodySmall.fontSize
-                                        )
-                                    }
-                                }
+                                    message = "در حال جستجو..."
+                                )
                             }
-
                         }
 
                         is PharmacyState.Success -> {
@@ -191,7 +181,7 @@ fun PharmacyBottomSheet(
                                             color = MaterialTheme.colorScheme.error,
                                             fontSize = MaterialTheme.typography.bodyMedium.fontSize
                                         )
-                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Spacer(modifier = Modifier.height(MaterialTheme.dime.sm))
                                         TextButton(
                                             onClick = { viewModel.retry() }) {
                                             Text("تلاش مجدد")
@@ -243,7 +233,7 @@ fun PharmacyResultItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(dime.md),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(dime.xs)
         ) {
             // نام برند
             Text(
@@ -288,19 +278,19 @@ fun PharmacyResultItem(
                             horizontalArrangement = Arrangement.Center,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                            Loading(size = 24.dp)
                         }
                     }
 
                     is PharmacyDetailState.Success -> {
                         Column(
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                            verticalArrangement = Arrangement.spacedBy(dime.sm)
                         ) {
                             HorizontalDivider(modifier = Modifier.padding(vertical = MaterialTheme.dime.xs))
                             // آدرس
                             Row(
                                 verticalAlignment = Alignment.Top,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                horizontalArrangement = Arrangement.spacedBy(dime.sm)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.LocationOn,
@@ -319,7 +309,7 @@ fun PharmacyResultItem(
                             if (detailState.detail.phone.isNotBlank()) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(dime.sm)
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Phone,

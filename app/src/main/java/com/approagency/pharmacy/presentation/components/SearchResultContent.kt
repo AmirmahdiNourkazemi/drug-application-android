@@ -67,7 +67,7 @@ fun SearchResultsContent(
                     Text(
                         text = error,
                         style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(vertical = 8.dp)
+                        modifier = Modifier.padding(vertical = MaterialTheme.dime.sm)
                     )
                 }
             }

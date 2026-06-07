@@ -17,7 +17,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -49,6 +48,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.approagency.pharmacy.domain.model.DrugDetail
 import com.approagency.pharmacy.presentation.common.ErrorState
+import com.approagency.pharmacy.presentation.common.Loading
 import com.approagency.pharmacy.presentation.viewModel.DrugDetailViewModel
 import com.approagency.pharmacy.presentation.viewModel.DrugDetailYabState
 import com.vada.caller.ui.theme.LocalDime
@@ -122,22 +122,10 @@ fun DrugDetailScreen(
                     DrugDetailYabState.Idle -> {}
 
                     DrugDetailYabState.Loading -> {
-                        Box(
+                        Loading(
                             modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                CircularProgressIndicator(
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(48.dp)
-                                )
-                                Spacer(modifier = Modifier.height(dime.md))
-                                Text(
-                                    text = "در حال دریافت اطلاعات دارو...",
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                                )
-                            }
-                        }
+                            message = "در حال دریافت اطلاعات دارو..."
+                        )
                     }
 
                     is DrugDetailYabState.Success -> {
@@ -629,7 +617,7 @@ fun DosageFormsTabContent(drugDetail: DrugDetail) {
                                             text = "پرخطر",
                                             fontSize = 10.sp,
                                             color = Color(0xFFC62828),
-                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = dime.xxs)
                                         )
                                     }
                                 }
@@ -642,7 +630,7 @@ fun DosageFormsTabContent(drugDetail: DrugDetail) {
                                             text = "حیاتی",
                                             fontSize = 10.sp,
                                             color = Color(0xFF2E7D32),
-                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = dime.xxs)
                                         )
                                     }
                                 }

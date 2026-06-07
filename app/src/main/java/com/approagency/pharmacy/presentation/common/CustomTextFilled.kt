@@ -143,7 +143,7 @@ fun CustomTextFilled(
                     },
                     modifier = Modifier
                         .weight(1f)
-                        .padding(horizontal = if (showClearButton && localValue.isNotEmpty()) 4.dp else 0.dp),
+                        .padding(horizontal = if (showClearButton && localValue.isNotEmpty()) MaterialTheme.dime.xs else 0.dp),
                     enabled = enabled,
                     readOnly = readOnly,
                     singleLine = singleLine,

@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +29,7 @@ import com.approagency.pharmacy.presentation.common.CustomTextFilled
 import com.approagency.pharmacy.presentation.common.EmptySearchState
 import com.approagency.pharmacy.presentation.common.EndOfListIndicator
 import com.approagency.pharmacy.presentation.common.ErrorState
+import com.approagency.pharmacy.presentation.common.Loading
 import com.approagency.pharmacy.presentation.common.LoadingMoreIndicator
 import com.approagency.pharmacy.presentation.common.PrimaryButton
 import com.approagency.pharmacy.presentation.components.DaroYabSearchResult
@@ -151,18 +151,10 @@ fun SearchScreen(
         // Results area
         when (val currentState = state) {
             is SearchState.Loading -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        CircularProgressIndicator(
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Text(
-                            text = "در حال جستجو...",
-                            modifier = Modifier.padding(top = dime.md),
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                        )
-                    }
-                }
+                Loading(
+                    modifier = Modifier.fillMaxSize(),
+                    message = "در حال جستجو..."
+                )
             }
 
             is SearchState.LoadingMore -> {
