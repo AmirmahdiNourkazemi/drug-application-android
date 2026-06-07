@@ -1,5 +1,6 @@
 package com.approagency.pharmacy.presentation.common
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,6 +26,7 @@ fun CustomModalBottomSheet(
         },
         sheetState = sheetState,
         modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(topStart = MaterialTheme.dime.lg, topEnd =  MaterialTheme.dime.lg)
     ) {
         Box(
