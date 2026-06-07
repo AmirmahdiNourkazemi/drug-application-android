@@ -8,8 +8,9 @@ class GetPharmaciesUseCase(
 ) {
     suspend operator fun invoke(
         genericDrugId: String,
+        brandIrc: String,
         provinceId: String
     ): List<PharmacyItem> {
-        return repository.searchPharmacies(genericDrugId, provinceId)
+        return repository.searchPharmacies(genericDrugId, brandIrc, provinceId)
     }
 }

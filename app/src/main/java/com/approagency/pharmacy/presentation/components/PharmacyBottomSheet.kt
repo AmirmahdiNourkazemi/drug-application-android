@@ -33,7 +33,11 @@ import com.vada.caller.ui.theme.dime
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PharmacyBottomSheet(
-    viewModel: PharmacyViewModel, genericDrugId: String, isOpen: Boolean, onDismiss: () -> Unit
+    viewModel: PharmacyViewModel,
+    genericDrugId: String,
+    brandIrc: String,
+    isOpen: Boolean,
+    onDismiss: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(
@@ -45,11 +49,10 @@ fun PharmacyBottomSheet(
 
     val pharmacyState by viewModel.state.collectAsState()
 
-    // جستجوی اولیه با استان تهران
-    LaunchedEffect(Unit) {
-        if (genericDrugId.isNotBlank()) {
-            viewModel.search(genericDrugId, "40")
-        }
+    // جستجوی اولیه با استان تهران — با تغییر دارو دوباره اجرا می‌شود
+    // (در صورت خالی بودن شناسه، ViewModel وضعیت قبلی را پاک و خطا نمایش می‌دهد)
+    LaunchedEffect(genericDrugId, brandIrc) {
+        viewModel.search(genericDrugId, brandIrc, "40")
     }
 
     if (isOpen) {
@@ -98,7 +101,7 @@ fun PharmacyBottomSheet(
                                         selectedProvinceId = province.id
                                         showProvinceDropdown = false
                                         // جستجو با استان جدید
-                                        viewModel.search(genericDrugId, province.id)
+                                        viewModel.search(genericDrugId, brandIrc, province.id)
                                     })
                                 }
                             }

@@ -38,6 +38,7 @@ class PharmacyViewModel(
     val pharmacyDetailStates: StateFlow<Map<String, PharmacyDetailState>> = _pharmacyDetailStates.asStateFlow()
 
     private var currentGenericDrugId: String = ""
+    private var currentBrandIrc: String = "0"
     private var currentProvinceId: String = "0"
 
     fun loadPharmacyDetail(pharmacyUrl: String) {
@@ -67,16 +68,26 @@ class PharmacyViewModel(
     }
 
 
-    fun search(genericDrugId: String, provinceId: String) {
-        if (genericDrugId.isBlank()) return
-
+    fun search(genericDrugId: String, brandIrc: String, provinceId: String) {
         currentGenericDrugId = genericDrugId
+        currentBrandIrc = brandIrc
         currentProvinceId = provinceId
+
+        // پاک کردن نتایج جستجوی قبلی تا داده‌ی قبلی نمایش داده نشود
+        _pharmacyDetailStates.value = emptyMap()
+
+        // حداقل یکی از شناسه‌ها (ژنریک یا برند) باید معتبر باشد
+        val hasGeneric = genericDrugId.isNotBlank() && genericDrugId != "0"
+        val hasBrand = brandIrc.isNotBlank() && brandIrc != "0"
+        if (!hasGeneric && !hasBrand) {
+            _state.value = PharmacyState.Error("شناسه دارو یافت نشد")
+            return
+        }
 
         viewModelScope.launch {
             _state.value = PharmacyState.Loading
             try {
-                val result = getPharmaciesUseCase(genericDrugId, provinceId)
+                val result = getPharmaciesUseCase(genericDrugId, brandIrc, provinceId)
                 _state.value = PharmacyState.Success(result)
             } catch (e: Exception) {
                 _state.value = PharmacyState.Error(e.message ?: "خطا در دریافت اطلاعات")
@@ -85,8 +96,6 @@ class PharmacyViewModel(
     }
 
     fun retry() {
-        if (currentGenericDrugId.isNotBlank()) {
-            search(currentGenericDrugId, currentProvinceId)
-        }
+        search(currentGenericDrugId, currentBrandIrc, currentProvinceId)
     }
 }

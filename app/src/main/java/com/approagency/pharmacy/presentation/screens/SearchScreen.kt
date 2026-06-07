@@ -128,13 +128,19 @@ fun SearchScreen(
         Spacer(modifier = Modifier.height(MaterialTheme.dime.md))
 
         if (showPharmacyBottomSheet && selectedDrugForPharmacy != null) {
-            // استخراج genericDrugId از URL
-            // مثال: /G-799/Fexofenadine -> 799
-            val genericId = extractGenericIdFromUrl(selectedDrugForPharmacy?.detailPageUrl ?: "")
+            // درخواست بر اساس نوع صفحه فرق می‌کند:
+            //  - صفحات برند (/B-...): شناسه باید به‌عنوان brandIrc ارسال شود
+            //  - صفحات ژنریک (/G-...): شناسه به‌عنوان genericDrugId ارسال می‌شود
+            // (genericId از قبل پارس شده و در هر دو حالت همان عدد را نگه می‌دارد)
+            val drug = selectedDrugForPharmacy!!
+            val isBrand = drug.detailPageUrl.contains("/B-")
+            val genericId = if (isBrand) "0" else drug.genericId
+            val brandIrc = if (isBrand) drug.genericId else "0"
 
             PharmacyBottomSheet(
                 viewModel = pharmacyViewModel,
                 genericDrugId = genericId,
+                brandIrc = brandIrc,
                 isOpen = showPharmacyBottomSheet,
                 onDismiss = {
                     showPharmacyBottomSheet = false
@@ -235,10 +241,4 @@ fun SearchScreen(
             }
         }
     }
-}
-
-// تابع کمکی برای استخراج ID از URL
-private fun extractGenericIdFromUrl(url: String): String {
-    val pattern = "/G-(\\d+)/".toRegex()
-    return pattern.find(url)?.groupValues?.get(1) ?: ""
 }

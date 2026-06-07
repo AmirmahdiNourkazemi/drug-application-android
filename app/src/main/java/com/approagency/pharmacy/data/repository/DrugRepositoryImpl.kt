@@ -94,12 +94,13 @@ class DrugRepositoryImpl(
 
     override suspend fun searchPharmacies(
         genericDrugId: String,
+        brandIrc: String,
         provId: String
     ): List<PharmacyItem> {
         return withContext(Dispatchers.IO) {
             try {
                 val html = darooyabApiService.getPharmacies(
-                    brandIrc = "0",
+                    brandIrc = brandIrc,
                     genericDrugId = genericDrugId,
                     provId = provId,
                     cityId = "0"

@@ -16,7 +16,7 @@ interface DrugRepository {
     suspend fun getGorohDaroei(): Result<DarmanModel>
     suspend fun searchDrugs(params:DaroYabParams):Result<DaroYabSearchResult>
     suspend fun getDrugDetailFromYab(detailUrl: String):Result<DrugDetail>
-    suspend fun searchPharmacies(genericDrugId: String,provId: String): List<PharmacyItem>
+    suspend fun searchPharmacies(genericDrugId: String, brandIrc: String, provId: String): List<PharmacyItem>
 
     suspend fun getPharmacyDetail(pharmacyUrl: String): PharmacyDetail
 

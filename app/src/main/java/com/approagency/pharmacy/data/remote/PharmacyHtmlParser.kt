@@ -14,64 +14,78 @@ object PharmacyHtmlParser {
         val doc = Jsoup.parse(html)
         val table = doc.select("table#TBL_patientReferral").first() ?: return emptyList()
 
-        // تشخیص ساختار بر اساس سربرگ جدول (یک بار برای کل جدول)
-        val hasGuaranteeColumn = hasGuaranteeColumnInHeader(table)
+        // ساختار جدول متغیر است:
+        //  - صفحات ژنریک: [نام برند, نام داروخانه, شهرستان] (گاهی با ستون «تضمین موجودی»)
+        //  - صفحات برند:  [نام داروخانه, شهرستان] (بدون ستون برند)
+        // بنابراین ایندکس ستون‌ها را از روی متن سربرگ تشخیص می‌دهیم نه موقعیت ثابت
+        val headers = table.select("thead th")
+        var brandIndex = -1
+        var pharmacyIndex = -1
+        var locationIndex = -1
+        headers.forEachIndexed { index, th ->
+            val text = th.text().trim()
+            when {
+                brandIndex == -1 && text.contains("برند") -> brandIndex = index
+                pharmacyIndex == -1 && text.contains("داروخانه") -> pharmacyIndex = index
+                locationIndex == -1 && (text.contains("شهرستان") || text.contains("استان")) -> locationIndex = index
+            }
+        }
 
         val rows = table.select("tbody tr")
 
         for (row in rows) {
             val cells = row.select("td")
-            if (cells.size < 3) continue
+            if (cells.isEmpty()) continue
 
-            // ایندکس ستون‌ها بر اساس وجود ستون تضمین
-            val brandIndex = if (hasGuaranteeColumn) 1 else 0
-            val pharmacyIndex = if (hasGuaranteeColumn) 2 else 1
-            val locationIndex = if (hasGuaranteeColumn) 3 else 2
+            // ستون داروخانه (ضروری) — اگر از سربرگ پیدا نشد، سلولی که لینک ph- دارد
+            val pIdx = if (pharmacyIndex in cells.indices) {
+                pharmacyIndex
+            } else {
+                cells.indexOfFirst { cell ->
+                    cell.select("a").any { it.attr("href").contains("ph-") }
+                }
+            }
+            if (pIdx < 0) continue
 
-            // ستون برند
-            val brandCell = cells[brandIndex]
-            val brandLink = brandCell.select("a").first()
+            val pharmacyCell = cells[pIdx]
+            // پیدا کردن لینک داروخانه (لینکی که "اطلاعات تماس" نباشد)
+            val pharmacyLink = pharmacyCell.select("a").firstOrNull {
+                !it.text().contains("اطلاعات تماس")
+            }
+            val pharmacyName = pharmacyLink?.text()?.trim() ?: ""
+            val pharmacyUrl = normalizeUrl(pharmacyLink?.attr("href")?.trim() ?: "")
+            val pharmacyId = extractIdFromUrl(pharmacyUrl, "/ph-(\\d+)/?")
+            if (pharmacyName.isBlank()) continue
+
+            // ستون برند (در صفحات برند وجود ندارد)
+            val brandCell = brandIndex.takeIf { it in cells.indices }?.let { cells[it] }
+            val brandLink = brandCell?.select("a")?.first()
             val brandName = brandLink?.text()?.trim() ?: ""
             val brandUrl = normalizeUrl(brandLink?.attr("href")?.trim() ?: "")
             val brandId = extractIdFromUrl(brandUrl, "/B-(\\d+)/?")
 
-            // ستون داروخانه
-            val pharmacyCell = cells[pharmacyIndex]
-            val pharmacyLinks = pharmacyCell.select("a")
-
-            // پیدا کردن لینک داروخانه (لینکی که "اطلاعات تماس" نباشد)
-            val pharmacyLink = pharmacyLinks.firstOrNull {
-                !it.text().contains("اطلاعات تماس")
+            // ستون موقعیت — اگر از سربرگ پیدا نشد، سلولی که «استان» دارد
+            val locIdx = if (locationIndex in cells.indices) {
+                locationIndex
+            } else {
+                cells.indexOfFirst { it.text().contains("استان") }
             }
-            val pharmacyName = pharmacyLink?.text()?.trim() ?: ""
-            var pharmacyUrl = pharmacyLink?.attr("href")?.trim() ?: ""
-
-            // نرمال کردن URL داروخانه
-            pharmacyUrl = normalizeUrl(pharmacyUrl)
-            val pharmacyId = extractIdFromUrl(pharmacyUrl, "/ph-(\\d+)/?")
-
-            // ستون موقعیت
-            val locationCell = cells[locationIndex]
-            val locationText = locationCell.text().trim()
-
-            // استخراج استان و شهر
+            val locationText = locIdx.takeIf { it in cells.indices }?.let { cells[it].text().trim() } ?: ""
             val province = extractProvince(locationText)
             val city = extractCity(locationText)
 
-            if (brandName.isNotBlank() && pharmacyName.isNotBlank()) {
-                items.add(
-                    PharmacyItem(
-                        brandName = brandName,
-                        brandUrl = brandUrl,
-                        brandId = brandId,
-                        pharmacyName = pharmacyName,
-                        pharmacyUrl = pharmacyUrl,
-                        pharmacyId = pharmacyId,
-                        province = province,
-                        city = city
-                    )
+            items.add(
+                PharmacyItem(
+                    brandName = brandName,
+                    brandUrl = brandUrl,
+                    brandId = brandId,
+                    pharmacyName = pharmacyName,
+                    pharmacyUrl = pharmacyUrl,
+                    pharmacyId = pharmacyId,
+                    province = province,
+                    city = city
                 )
-            }
+            )
         }
 
         return items
@@ -106,18 +120,6 @@ object PharmacyHtmlParser {
         } else {
             "/$cleanUrl"
         }
-    }
-
-    /**
-     * تشخیص وجود ستون تضمین موجودی با بررسی سربرگ جدول
-     */
-    private fun hasGuaranteeColumnInHeader(table: org.jsoup.nodes.Element): Boolean {
-        val headers = table.select("thead th")
-        if (headers.isEmpty()) return false
-
-        // بررسی می‌کنیم که آیا اولین ستون حاوی متن "تضمین" است
-        val firstHeaderText = headers.firstOrNull()?.text()?.trim() ?: ""
-        return firstHeaderText.contains("تضمین") || firstHeaderText.contains("موجودی")
     }
 
     private fun extractProvince(locationText: String): String {
