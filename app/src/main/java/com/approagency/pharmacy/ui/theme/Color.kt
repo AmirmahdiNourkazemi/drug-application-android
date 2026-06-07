@@ -1,3 +1,3 @@
 package com.approagency.pharmacy.ui.theme
 
-// رنگ‌های برنامه در MaterialThemeExt.kt (MedicalColors و ColorScheme ها) تعریف شده‌اند.
+// رنگ‌های برنامه به‌صورت ColorScheme کامل (Light/Dark) در Theme.kt تعریف شده‌اند.

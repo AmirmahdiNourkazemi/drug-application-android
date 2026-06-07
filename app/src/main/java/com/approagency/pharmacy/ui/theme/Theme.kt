@@ -14,72 +14,96 @@ import androidx.compose.ui.platform.LocalContext
 import com.fabirt.podcastapp.ui.theme.Shapes
 import com.vada.caller.ui.theme.Dime
 import com.vada.caller.ui.theme.LocalDime
-object MedicalColors {
+// پالت کامل و هماهنگ بر پایه‌ی سبز-آبی پزشکی (teal).
+// همه‌ی نقش‌های surface/container/outline تعریف شده‌اند تا کانتینرها (کارت‌ها،
+// تکست‌فیلدها، باتم‌شیت‌ها) رنگ یکدست و متناسب با برند داشته باشند و به مقادیر
+// پیش‌فرض بنفش‌گون Material برنگردند.
+private val LightColorScheme = lightColorScheme(
+    primary = Color(0xFF0F766E),
+    onPrimary = Color(0xFFFFFFFF),
+    primaryContainer = Color(0xFFC7ECE6),
+    onPrimaryContainer = Color(0xFF00201D),
 
-    val Primary = Color(0xFF0F766E)
-    val PrimaryContainer = Color(0xFFD7F3EF)
+    secondary = Color(0xFF4C6360),
+    onSecondary = Color(0xFFFFFFFF),
+    secondaryContainer = Color(0xFFCEE8E3),
+    onSecondaryContainer = Color(0xFF09201D),
 
-    val Secondary = Color(0xFF5B8E8A)
-    val SecondaryContainer = Color(0xFFE3F3F1)
+    tertiary = Color(0xFF3D6373),
+    onTertiary = Color(0xFFFFFFFF),
+    tertiaryContainer = Color(0xFFC0E8FB),
+    onTertiaryContainer = Color(0xFF001F2A),
 
-    val Tertiary = Color(0xFF8FBFB8)
+    background = Color(0xFFF5FBF9),
+    onBackground = Color(0xFF171D1C),
 
-    val Background = Color(0xFFF8FCFB)
-    val Surface = Color(0xFFFFFFFF)
+    surface = Color(0xFFF5FBF9),
+    onSurface = Color(0xFF171D1C),
+    surfaceVariant = Color(0xFFDAE5E1),
+    onSurfaceVariant = Color(0xFF3F4947),
 
-    val DarkBackground = Color(0xFF0F1720)
-    val DarkSurface = Color(0xFF17232B)
+    surfaceContainerLowest = Color(0xFFFFFFFF),
+    surfaceContainerLow = Color(0xFFEFF6F3),
+    surfaceContainer = Color(0xFFE9F1EE),
+    surfaceContainerHigh = Color(0xFFE3ECE9),
+    surfaceContainerHighest = Color(0xFFDEE7E4),
 
-    val OnDark = Color(0xFFF5FAF9)
-    val OnLight = Color(0xFF102A2A)
+    outline = Color(0xFF6F7977),
+    outlineVariant = Color(0xFFBEC9C5),
 
-    val Error = Color(0xFFD64545)
+    error = Color(0xFFBA1A1A),
+    onError = Color(0xFFFFFFFF),
+    errorContainer = Color(0xFFFFDAD6),
+    onErrorContainer = Color(0xFF410002),
 
-    val Outline = Color(0xFFD0E2DF)
-}
-private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFF5DD4C3),
-    onPrimary = Color(0xFF003733),
-
-    secondary = Color(0xFF8CC9C1),
-    onSecondary = Color(0xFF0D2B29),
-
-    tertiary = Color(0xFFA7DCD4),
-    onTertiary = Color(0xFF102A2A),
-
-    background = MedicalColors.DarkBackground,
-    onBackground = MedicalColors.OnDark,
-
-    surface = MedicalColors.DarkSurface,
-    onSurface = MedicalColors.OnDark,
-
-    primaryContainer = Color(0xFF124A45),
-    secondaryContainer = Color(0xFF1D3D3A),
-
-    error = Color(0xFFFF8A80)
+    inverseSurface = Color(0xFF2B3231),
+    inverseOnSurface = Color(0xFFECF2EF),
+    inversePrimary = Color(0xFF80D5CB),
+    scrim = Color(0xFF000000),
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = MedicalColors.Primary,
-    onPrimary = Color.White,
+private val DarkColorScheme = darkColorScheme(
+    primary = Color(0xFF5DD4C3),
+    onPrimary = Color(0xFF00382F),
+    primaryContainer = Color(0xFF005048),
+    onPrimaryContainer = Color(0xFF7FF8E6),
 
-    secondary = MedicalColors.Secondary,
-    onSecondary = Color.White,
+    secondary = Color(0xFFB0CCC6),
+    onSecondary = Color(0xFF1B3531),
+    secondaryContainer = Color(0xFF324B47),
+    onSecondaryContainer = Color(0xFFCCE8E2),
 
-    tertiary = MedicalColors.Tertiary,
-    onTertiary = MedicalColors.OnLight,
+    tertiary = Color(0xFFA4CCDE),
+    onTertiary = Color(0xFF053543),
+    tertiaryContainer = Color(0xFF234C5B),
+    onTertiaryContainer = Color(0xFFC0E8FB),
 
-    background = MedicalColors.Background,
-    onBackground = MedicalColors.OnLight,
+    background = Color(0xFF0E1514),
+    onBackground = Color(0xFFDDE4E1),
 
-    surface = MedicalColors.Surface,
-    onSurface = MedicalColors.OnLight,
+    surface = Color(0xFF0E1514),
+    onSurface = Color(0xFFDDE4E1),
+    surfaceVariant = Color(0xFF3F4947),
+    onSurfaceVariant = Color(0xFFBEC9C5),
 
-    primaryContainer = MedicalColors.PrimaryContainer,
-    secondaryContainer = MedicalColors.SecondaryContainer,
+    surfaceContainerLowest = Color(0xFF090F0E),
+    surfaceContainerLow = Color(0xFF171D1C),
+    surfaceContainer = Color(0xFF1B211F),
+    surfaceContainerHigh = Color(0xFF252B2A),
+    surfaceContainerHighest = Color(0xFF303635),
 
-    outline = MedicalColors.Outline,
-    error = MedicalColors.Error
+    outline = Color(0xFF899390),
+    outlineVariant = Color(0xFF3F4947),
+
+    error = Color(0xFFFFB4AB),
+    onError = Color(0xFF690005),
+    errorContainer = Color(0xFF93000A),
+    onErrorContainer = Color(0xFFFFDAD6),
+
+    inverseSurface = Color(0xFFDDE4E1),
+    inverseOnSurface = Color(0xFF2B3231),
+    inversePrimary = Color(0xFF0F766E),
+    scrim = Color(0xFF000000),
 )
 
 @Composable

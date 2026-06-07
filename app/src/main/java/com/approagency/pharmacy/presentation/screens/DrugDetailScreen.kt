@@ -1,8 +1,12 @@
 package com.approagency.pharmacy.presentation.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,9 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,8 +40,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,6 +55,7 @@ import com.approagency.pharmacy.presentation.common.Loading
 import com.approagency.pharmacy.presentation.viewModel.DrugDetailViewModel
 import com.approagency.pharmacy.presentation.viewModel.DrugDetailYabState
 import com.vada.caller.ui.theme.LocalDime
+import com.vada.caller.ui.theme.dime
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -85,17 +89,21 @@ fun DrugDetailScreen(
                                     )
                                     if (state.drugDetail.englishName.isNotEmpty()) {
                                         Text(
-                                            text = state.drugDetail.englishName.take(30),
-                                            fontSize = 11.sp,
-                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                            maxLines = 1
+                                            text = state.drugDetail.englishName,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
                                         )
                                     }
                                 }
                             }
 
                             else -> {
-                                Text("جزئیات دارو", fontSize = 16.sp)
+                                Text(
+                                    text = "جزئیات دارو",
+                                    style = MaterialTheme.typography.titleMedium
+                                )
                             }
                         }
                     },
@@ -157,7 +165,7 @@ fun DrugDetailScreen(
                                         text = {
                                             Text(
                                                 text = title,
-                                                fontSize = 13.sp,
+                                                style = MaterialTheme.typography.labelLarge,
                                                 fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal,
                                                 maxLines = 1
                                             )
@@ -170,8 +178,8 @@ fun DrugDetailScreen(
                             LazyColumn(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(horizontal = dime.md)
-                                    .padding(top = dime.md),
+                                    .padding(horizontal = dime.md),
+                                contentPadding = PaddingValues(top = dime.md, bottom = dime.xxl),
                                 verticalArrangement = Arrangement.spacedBy(dime.md)
                             ) {
                                 when (selectedTab) {
@@ -219,62 +227,59 @@ fun ManufacturerInfoCard(
     modifier: Modifier = Modifier
 ) {
     val dime = LocalDime.current
+    val onContainer = MaterialTheme.colorScheme.onSecondaryContainer
 
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f)
-        ),
-        shape = RoundedCornerShape(dime.sm)
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.large)
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .padding(dime.md),
+        verticalArrangement = Arrangement.spacedBy(dime.sm)
     ) {
-        Column(
-            modifier = Modifier.padding(dime.md),
-            verticalArrangement = Arrangement.spacedBy(dime.xs)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(dime.sm)
         ) {
+            Icon(
+                imageVector = Icons.Default.Info,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+                tint = onContainer
+            )
+            Text(
+                text = "سازنده:",
+                style = MaterialTheme.typography.labelLarge,
+                color = onContainer
+            )
+            Text(
+                text = manufacturer,
+                style = MaterialTheme.typography.bodyMedium,
+                color = onContainer
+            )
+        }
+
+        if (genericInfo != null) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(dime.xs)
+                horizontalArrangement = Arrangement.spacedBy(dime.sm)
             ) {
                 Icon(
                     imageVector = Icons.Default.Info,
                     contentDescription = null,
                     modifier = Modifier.size(18.dp),
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = onContainer
                 )
                 Text(
-                    text = "سازنده:",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp
+                    text = "ماده موثره:",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = onContainer
                 )
                 Text(
-                    text = manufacturer,
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.primary
+                    text = genericInfo.persianName,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = onContainer
                 )
-            }
-
-            if (genericInfo != null) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(dime.xs)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Info,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = "ماده موثره:",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp
-                    )
-                    Text(
-                        text = genericInfo.persianName,
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
             }
         }
     }
@@ -308,44 +313,13 @@ fun GeneralInfoTabContent(drugDetail: DrugDetail) {
             else {
                 // Categories Card
                 if (drugDetail.drugClass != null || drugDetail.therapeuticClass != null) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
-                        ),
-                        shape = RoundedCornerShape(dime.sm)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(dime.md),
-                            verticalArrangement = Arrangement.spacedBy(dime.xs)
-                        ) {
+                    DetailCard {
+                        Column(verticalArrangement = Arrangement.spacedBy(dime.xs)) {
                             drugDetail.drugClass?.let {
-                                Row {
-                                    Text(
-                                        text = "طبقه بندی مارتیندل: ",
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 13.sp
-                                    )
-                                    Text(
-                                        text = it,
-                                        fontSize = 13.sp,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                }
+                                LabeledRow(label = "طبقه بندی مارتیندل", value = it)
                             }
                             drugDetail.therapeuticClass?.let {
-                                Row {
-                                    Text(
-                                        text = "طبقه درمانی: ",
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 13.sp
-                                    )
-                                    Text(
-                                        text = it,
-                                        fontSize = 13.sp,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                }
+                                LabeledRow(label = "طبقه درمانی", value = it)
                             }
                         }
                     }
@@ -353,39 +327,36 @@ fun GeneralInfoTabContent(drugDetail: DrugDetail) {
 
                 // Pregnancy Card
                 if (drugDetail.pregnancyCategory != null || drugDetail.pregnancyDescription != null) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFFFFF3E0)
-                        ),
-                        shape = RoundedCornerShape(dime.sm)
+                    val onContainer = MaterialTheme.colorScheme.onTertiaryContainer
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(MaterialTheme.shapes.large)
+                            .background(MaterialTheme.colorScheme.tertiaryContainer)
+                            .padding(dime.md),
+                        verticalArrangement = Arrangement.spacedBy(dime.xs)
                     ) {
-                        Column(
-                            modifier = Modifier.padding(dime.md),
-                            verticalArrangement = Arrangement.spacedBy(dime.xs)
-                        ) {
+                        Text(
+                            text = "مصرف در بارداری",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = onContainer
+                        )
+                        drugDetail.pregnancyCategory?.let {
                             Text(
-                                text = "مصرف در بارداری",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 15.sp,
-                                color = Color(0xFFE65100)
+                                text = "گروه: $it",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium,
+                                color = onContainer
                             )
-                            drugDetail.pregnancyCategory?.let {
-                                Text(
-                                    text = "گروه: $it",
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
-                            drugDetail.pregnancyDescription?.let {
-                                Spacer(modifier = Modifier.height(dime.xs))
-                                Text(
-                                    text = it,
-                                    fontSize = 12.sp,
-                                    lineHeight = 18.sp,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                                )
-                            }
+                        }
+                        drugDetail.pregnancyDescription?.let {
+                            Text(
+                                text = it,
+                                style = MaterialTheme.typography.bodySmall,
+                                lineHeight = 18.sp,
+                                color = onContainer.copy(alpha = 0.9f)
+                            )
                         }
                     }
                 }
@@ -427,19 +398,7 @@ fun GeneralInfoTabContent(drugDetail: DrugDetail) {
                 drugDetail.generalInfo.isNullOrBlank() &&
                 drugDetail.specializedInfo.isNullOrBlank()
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "اطلاعات عمومی برای این دارو ثبت نشده است",
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                        textAlign = TextAlign.Center
-                    )
-                }
+                DetailEmptyState(text = "اطلاعات عمومی برای این دارو ثبت نشده است")
             }
         }  else {
             // ========== صفحات برند (Brand) ==========
@@ -465,19 +424,9 @@ fun GeneralInfoTabContent(drugDetail: DrugDetail) {
                 drugDetail.sideEffects == null &&
                 drugDetail.warnings == null
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "اطلاعات عمومی برای این برند ثبت نشده است.\nبرای مشاهده اطلاعات کامل، به صفحه داروی ژنریک مراجعه کنید.",
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                        textAlign = TextAlign.Center
-                    )
-                }
+                DetailEmptyState(
+                    text = "اطلاعات عمومی برای این برند ثبت نشده است.\nبرای مشاهده اطلاعات کامل، به صفحه داروی ژنریک مراجعه کنید."
+                )
             }
         }
     }
@@ -525,22 +474,12 @@ fun SpecializedInfoTabContent(drugDetail: DrugDetail) {
             drugDetail.sideEffects == null &&
             drugDetail.warnings == null
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(32.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = if (drugDetail.isGeneric)
-                        "اطلاعات تخصصی برای این دارو ثبت نشده است"
-                    else
-                        "اطلاعات تخصصی برای این برند ثبت نشده است.\nبرای مشاهده اطلاعات کامل، به صفحه داروی ژنریک مراجعه کنید.",
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    textAlign = TextAlign.Center
-                )
-            }
+            DetailEmptyState(
+                text = if (drugDetail.isGeneric)
+                    "اطلاعات تخصصی برای این دارو ثبت نشده است"
+                else
+                    "اطلاعات تخصصی برای این برند ثبت نشده است.\nبرای مشاهده اطلاعات کامل، به صفحه داروی ژنریک مراجعه کنید."
+            )
         }
     }
 }
@@ -551,89 +490,54 @@ fun DosageFormsTabContent(drugDetail: DrugDetail) {
     val dosageForms = drugDetail.dosageForms
 
     if (dosageForms.isEmpty()) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(32.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = if (drugDetail.isGeneric)
-                    "اشکال دارویی برای این دارو ثبت نشده است"
-                else
-                    "سایر اشکال دارویی این برند ثبت نشده است",
-                fontSize = 13.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                textAlign = TextAlign.Center
-            )
-        }
+        DetailEmptyState(
+            text = if (drugDetail.isGeneric)
+                "اشکال دارویی برای این دارو ثبت نشده است"
+            else
+                "سایر اشکال دارویی این برند ثبت نشده است"
+        )
     } else {
         Column(verticalArrangement = Arrangement.spacedBy(dime.sm)) {
             // اگر صفحه برند است، عنوان متفاوت نشان بده
             if (!drugDetail.isGeneric) {
-                Text(
-                    text = "سایر محصولات این برند",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.primary,
+                SectionHeader(
+                    title = "سایر محصولات این برند",
                     modifier = Modifier.padding(bottom = dime.xs)
                 )
             }
 
             dosageForms.forEach { form ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-                    shape = RoundedCornerShape(dime.sm)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(dime.md),
-                        verticalArrangement = Arrangement.spacedBy(dime.xs)
-                    ) {
+                DetailCard {
+                    Text(
+                        text = form.persianName,
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                    if (form.englishName.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(dime.xxs))
                         Text(
-                            text = form.persianName,
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 14.sp
+                            text = form.englishName,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        if (form.englishName.isNotBlank()) {
-                            Text(
-                                text = form.englishName,
-                                fontSize = 11.sp,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                            )
-                        }
+                    }
 
-                        // نشانگرهای خطر
-                        if (form.isHighRisk || form.isVital) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(dime.xs)
-                            ) {
-                                if (form.isHighRisk) {
-                                    androidx.compose.material3.Surface(
-                                        shape = RoundedCornerShape(4.dp),
-                                        color = Color(0xFFFFEBEE)
-                                    ) {
-                                        Text(
-                                            text = "پرخطر",
-                                            fontSize = 10.sp,
-                                            color = Color(0xFFC62828),
-                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = dime.xxs)
-                                        )
-                                    }
-                                }
-                                if (form.isVital) {
-                                    androidx.compose.material3.Surface(
-                                        shape = RoundedCornerShape(4.dp),
-                                        color = Color(0xFFE8F5E9)
-                                    ) {
-                                        Text(
-                                            text = "حیاتی",
-                                            fontSize = 10.sp,
-                                            color = Color(0xFF2E7D32),
-                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = dime.xxs)
-                                        )
-                                    }
-                                }
+                    // نشانگرهای خطر
+                    if (form.isHighRisk || form.isVital) {
+                        Spacer(modifier = Modifier.height(dime.sm))
+                        Row(horizontalArrangement = Arrangement.spacedBy(dime.xs)) {
+                            if (form.isHighRisk) {
+                                TagChip(
+                                    text = "پرخطر",
+                                    container = MaterialTheme.colorScheme.errorContainer,
+                                    onContainer = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                            }
+                            if (form.isVital) {
+                                TagChip(
+                                    text = "حیاتی",
+                                    container = MaterialTheme.colorScheme.primaryContainer,
+                                    onContainer = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
                             }
                         }
                     }
@@ -648,83 +552,31 @@ fun BrandNamesTabContent(drugDetail: DrugDetail) {
     val dime = LocalDime.current
 
     if (drugDetail.isGeneric && drugDetail.brandNames.isEmpty()) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(32.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "اسامی تجاری برای این دارو ثبت نشده است",
-                fontSize = 13.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                textAlign = TextAlign.Center
-            )
-        }
+        DetailEmptyState(text = "اسامی تجاری برای این دارو ثبت نشده است")
     } else if (drugDetail.isGeneric && drugDetail.brandNames.isNotEmpty()) {
         Column(verticalArrangement = Arrangement.spacedBy(dime.sm)) {
             drugDetail.brandNames.forEach { brand ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-                    shape = RoundedCornerShape(dime.sm)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(dime.md),
-                        verticalArrangement = Arrangement.spacedBy(dime.xs)
-                    ) {
-                        Text(
-                            text = brand.persianName,
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 14.sp
-                        )
-                        brand.manufacturer?.let {
-                            Row {
-                                Text(
-                                    text = "تولید کننده: ",
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                                )
-                                Text(
-                                    text = it,
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        }
-                        brand.importer?.let {
-                            Row {
-                                Text(
-                                    text = "وارد کننده: ",
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                                )
-                                Text(
-                                    text = it,
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        }
+                DetailCard {
+                    Text(
+                        text = brand.persianName,
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                    brand.manufacturer?.let {
+                        Spacer(modifier = Modifier.height(dime.xs))
+                        LabeledRow(label = "تولید کننده", value = it)
+                    }
+                    brand.importer?.let {
+                        Spacer(modifier = Modifier.height(dime.xxs))
+                        LabeledRow(label = "وارد کننده", value = it)
                     }
                 }
             }
         }
     } else {
         // صفحه برند است - اسامی تجاری برای برند معنی ندارد
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(32.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "این صفحه مربوط به یک محصول تجاری است. برای مشاهده اسامی تجاری سایر برندها، به صفحه داروی ژنریک مراجعه کنید.",
-                fontSize = 13.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                textAlign = TextAlign.Center
-            )
-        }
+        DetailEmptyState(
+            text = "این صفحه مربوط به یک محصول تجاری است. برای مشاهده اسامی تجاری سایر برندها، به صفحه داروی ژنریک مراجعه کنید."
+        )
     }
 }
 
@@ -736,29 +588,136 @@ fun InfoSectionCard(
 ) {
     val dime = LocalDime.current
 
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        shape = RoundedCornerShape(dime.sm)
-    ) {
-        Column(
-            modifier = Modifier.padding(dime.md),
-            verticalArrangement = Arrangement.spacedBy(dime.xs)
-        ) {
-            Text(
-                text = title,
-                fontWeight = FontWeight.Bold,
-                fontSize = 15.sp,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-            Text(
-                text = content,
-                fontSize = 13.sp,
-                lineHeight = 20.sp,
-                textAlign = TextAlign.Justify,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
-            )
-        }
+    DetailCard(modifier = modifier) {
+        SectionHeader(title = title)
+        Spacer(modifier = Modifier.height(dime.sm))
+        Text(
+            text = content,
+            style = MaterialTheme.typography.bodyMedium,
+            lineHeight = 22.sp,
+            textAlign = TextAlign.Justify,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
+}
+
+/**
+ * کارت پایه‌ی صفحه‌ی جزئیات — ظاهر یکدست با بقیه‌ی برنامه:
+ * سطح روشن + قاب نازک هم‌رنگ تم، بدون سایه‌ی سنگین.
+ */
+@Composable
+private fun DetailCard(
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    val shape = MaterialTheme.shapes.large
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outlineVariant,
+                shape = shape
+            )
+            .padding(MaterialTheme.dime.md),
+        content = content
+    )
+}
+
+/** سربرگ بخش با نوار تأکید کوچک کنار عنوان. */
+@Composable
+private fun SectionHeader(
+    title: String,
+    modifier: Modifier = Modifier
+) {
+    val dime = LocalDime.current
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(dime.sm)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(width = 4.dp, height = 18.dp)
+                .clip(RoundedCornerShape(dime.xxs))
+                .background(MaterialTheme.colorScheme.primary)
+        )
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
+        )
+    }
+}
+
+/** حالت «اطلاعاتی ثبت نشده» با آیکن، یکدست در همه‌ی تب‌ها. */
+@Composable
+private fun DetailEmptyState(
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    val dime = LocalDime.current
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = dime.xxl, horizontal = dime.lg),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(dime.sm)
+    ) {
+        Icon(
+            imageVector = Icons.Default.Info,
+            contentDescription = null,
+            modifier = Modifier.size(40.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+        )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+/** ردیف «برچسب: مقدار» با تایپوگرافی یکدست. */
+@Composable
+private fun LabeledRow(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Row(modifier = modifier) {
+        Text(
+            text = "$label: ",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+/** برچسب کوچک رنگی (مثل «پرخطر» / «حیاتی»). */
+@Composable
+private fun TagChip(
+    text: String,
+    container: Color,
+    onContainer: Color
+) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelSmall,
+        color = onContainer,
+        modifier = Modifier
+            .clip(RoundedCornerShape(MaterialTheme.dime.xs))
+            .background(container)
+            .padding(horizontal = MaterialTheme.dime.sm, vertical = MaterialTheme.dime.xxs)
+    )
 }
