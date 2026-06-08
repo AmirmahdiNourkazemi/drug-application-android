@@ -14,8 +14,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -29,13 +27,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.approagency.pharmacy.presentation.common.ErrorState
 import com.approagency.pharmacy.presentation.common.Loading
+import com.approagency.pharmacy.presentation.common.SegmentedTabBar
 import com.approagency.pharmacy.presentation.components.drugdetail.BrandNamesTabContent
 import com.approagency.pharmacy.presentation.components.drugdetail.DosageFormsTabContent
 import com.approagency.pharmacy.presentation.components.drugdetail.GeneralInfoTabContent
@@ -140,26 +138,15 @@ fun DrugDetailScreen(
                                 )
                             }
 
-                            TabRow(
-                                selectedTabIndex = selectedTab,
-                                containerColor = MaterialTheme.colorScheme.surface,
-                                contentColor = MaterialTheme.colorScheme.primary
-                            ) {
-                                tabs.forEachIndexed { index, title ->
-                                    Tab(
-                                        selected = selectedTab == index,
-                                        onClick = { selectedTab = index },
-                                        text = {
-                                            Text(
-                                                text = title,
-                                                style = MaterialTheme.typography.labelLarge,
-                                                fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal,
-                                                maxLines = 1
-                                            )
-                                        }
-                                    )
-                                }
-                            }
+                            SegmentedTabBar(
+                                tabs = tabs,
+                                selectedIndex = selectedTab,
+                                onSelected = { selectedTab = it },
+                                modifier = Modifier.padding(
+                                    horizontal = dime.md,
+                                    vertical = dime.sm
+                                )
+                            )
 
                             LazyColumn(
                                 modifier = Modifier
