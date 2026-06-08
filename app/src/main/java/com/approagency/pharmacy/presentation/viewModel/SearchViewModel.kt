@@ -1,4 +1,4 @@
-package com.approgency.drug.presentation.viewModel
+package com.approagency.pharmacy.presentation.viewModel
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

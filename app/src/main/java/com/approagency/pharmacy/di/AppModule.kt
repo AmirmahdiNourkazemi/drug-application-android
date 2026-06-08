@@ -24,7 +24,7 @@ import com.approagency.pharmacy.presentation.viewModel.HomeViewModel
 import com.approagency.pharmacy.presentation.viewModel.LabViewModel
 import com.approagency.pharmacy.presentation.viewModel.PharmacyViewModel
 import com.approagency.pharmacy.utils.Config
-import com.approgency.drug.presentation.viewModel.SearchViewModel
+import com.approagency.pharmacy.presentation.viewModel.SearchViewModel
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext

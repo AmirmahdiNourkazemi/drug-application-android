@@ -37,8 +37,8 @@ import com.approagency.pharmacy.presentation.components.DrugDetailBottomSheet
 import com.approagency.pharmacy.presentation.components.PharmacyBottomSheet
 import com.approagency.pharmacy.presentation.viewModel.DrugDetailViewModel
 import com.approagency.pharmacy.presentation.viewModel.PharmacyViewModel
-import com.approgency.drug.presentation.viewModel.SearchState
-import com.approgency.drug.presentation.viewModel.SearchViewModel
+import com.approagency.pharmacy.presentation.viewModel.SearchState
+import com.approagency.pharmacy.presentation.viewModel.SearchViewModel
 import com.vada.caller.ui.theme.LocalDime
 import com.vada.caller.ui.theme.dime
 import org.koin.androidx.compose.koinViewModel
