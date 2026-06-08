@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.approagency.pharmacy.domain.model.DrugSearchResult
 import com.approagency.pharmacy.domain.usecase.SearchDrugsYabUseCase
+import com.approagency.pharmacy.utils.toUserMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -77,7 +78,7 @@ class SearchViewModel(
                 }
                 else -> {
                     isLoadingMore = false
-                    SearchState.Error(result.exceptionOrNull()?.message ?: "خطا در جستجو")
+                    SearchState.Error(result.exceptionOrNull().toUserMessage())
                 }
             }
         }

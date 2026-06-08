@@ -8,6 +8,7 @@ import com.approagency.pharmacy.domain.model.TestItem
 import com.approagency.pharmacy.domain.usecase.GetTestGroupUseCase
 import com.approagency.pharmacy.domain.usecase.GetTestItemByGroupId
 import com.approagency.pharmacy.domain.usecase.SearchTestsUseCase
+import com.approagency.pharmacy.utils.toUserMessage
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -87,7 +88,7 @@ class LabViewModel (
                     it.copy(
                         isLoading = false,
                         searchResults = null,
-                        error = e.message ?: "خطا در جستجو"
+                        error = e.toUserMessage()
                     )
                 }
             }
@@ -109,7 +110,7 @@ class LabViewModel (
                     )
                 }
             } catch (e:HttpException){
-                handleError(e.message)
+                handleError(e.toUserMessage())
             }
 
         }
@@ -132,7 +133,7 @@ class LabViewModel (
                     )
                 }
             }  catch (e:HttpException){
-                handleError(e.message)
+                handleError(e.toUserMessage())
             }
         }
     }

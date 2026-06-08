@@ -67,15 +67,11 @@ class DrugRepositoryImpl(
 
                 val searchResult = parser.parseSearchResultsWithPagination(htmlResponse)
 
-                if (searchResult.drugs.isNotEmpty()) {
-                    Result.success(searchResult)
-                } else {
-                    Result.failure(Exception("No drugs found for query: '${params.query}'"))
-                }
+                Result.success(searchResult)
             } catch (e: IOException) {
-                Result.failure(Exception("Network error: ${e.message}", e))
+                Result.failure(e)
             } catch (e: Exception) {
-                Result.failure(Exception("An error occurred: ${e.message}", e))
+                Result.failure(e)
             }
         }
     }

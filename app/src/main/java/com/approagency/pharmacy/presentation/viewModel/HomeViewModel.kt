@@ -9,6 +9,8 @@ import com.approagency.pharmacy.domain.model.DrugSearchParams
 import com.approagency.pharmacy.domain.usecase.GetDarmanUseCase
 import com.approagency.pharmacy.domain.usecase.GetDrugDetailUseCase
 import com.approagency.pharmacy.domain.usecase.GetDrugSearchUseCase
+import com.approagency.pharmacy.utils.ErrorMessages
+import com.approagency.pharmacy.utils.toUserMessage
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -49,9 +51,9 @@ class HomeViewModel (
                     )
                 }
             }catch (e: Exception) {
-                handleError(e.message)
+                handleError(e.toUserMessage())
             }catch (e: Exception) {
-                handleError(e.localizedMessage ?: "Unknown error")
+                handleError(e.toUserMessage())
             }
         }
     }
@@ -73,10 +75,10 @@ class HomeViewModel (
                 ) }
             } catch (e: Exception) {
                 println(e.message)
-                handleError(e.message)
+                handleError(e.toUserMessage())
             }catch (e: Exception) {
                 println(e.message)
-                handleError(e.localizedMessage ?: "Unknown error")
+                handleError(e.toUserMessage())
             }
         }
     }
@@ -103,9 +105,9 @@ class HomeViewModel (
                 }
                 println(result)
             } catch (e: Exception) {
-                handleError(e.message)
+                handleError(e.toUserMessage())
             }catch (e: Exception) {
-                handleError(e.localizedMessage ?: "Unknown error")
+                handleError(e.toUserMessage())
             }
         }
     }
@@ -126,7 +128,7 @@ class HomeViewModel (
         ) , drugDetailState = it.drugDetailState.copy(
             isLoading = false
         ))  }
-        _event.emit(HomeEvent.ShowError(message ?: "Error occurred"))
+        _event.emit(HomeEvent.ShowError(message ?: ErrorMessages.GENERIC))
     }
 
     // Clear error when consumed

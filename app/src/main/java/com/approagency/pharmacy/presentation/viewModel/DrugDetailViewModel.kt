@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.approagency.pharmacy.domain.model.DrugDetail
 import com.approagency.pharmacy.domain.usecase.DrugDetailYabUseCase
+import com.approagency.pharmacy.utils.toUserMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,7 +23,7 @@ class DrugDetailViewModel(
             val result = drugDetailUseCase(detailUrl)
             _detailState.value = when {
                 result.isSuccess -> DrugDetailYabState.Success(result.getOrNull()!!)
-                else -> DrugDetailYabState.Error(result.exceptionOrNull()?.message ?: "خطا در دریافت اطلاعات")
+                else -> DrugDetailYabState.Error(result.exceptionOrNull().toUserMessage())
             }
         }
     }

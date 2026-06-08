@@ -7,6 +7,7 @@ import com.approagency.pharmacy.domain.model.PharmacyDetail
 import com.approagency.pharmacy.domain.model.PharmacyItem
 import com.approagency.pharmacy.domain.usecase.GetPharmaciesUseCase
 import com.approagency.pharmacy.domain.usecase.GetPharmacyDetailUseCase
+import com.approagency.pharmacy.utils.toUserMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -61,7 +62,7 @@ class PharmacyViewModel(
                 }
             } catch (e: Exception) {
                 _pharmacyDetailStates.value = _pharmacyDetailStates.value.toMutableMap().apply {
-                    put(pharmacyUrl, PharmacyDetailState.Error(e.message ?: "خطا در دریافت اطلاعات"))
+                    put(pharmacyUrl, PharmacyDetailState.Error(e.toUserMessage()))
                 }
             }
         }
@@ -90,7 +91,7 @@ class PharmacyViewModel(
                 val result = getPharmaciesUseCase(genericDrugId, brandIrc, provinceId)
                 _state.value = PharmacyState.Success(result)
             } catch (e: Exception) {
-                _state.value = PharmacyState.Error(e.message ?: "خطا در دریافت اطلاعات")
+                _state.value = PharmacyState.Error(e.toUserMessage())
             }
         }
     }
