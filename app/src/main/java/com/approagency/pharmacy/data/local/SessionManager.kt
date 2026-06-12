@@ -2,6 +2,7 @@ package com.approagency.pharmacy.data.local
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.approagency.pharmacy.ui.theme.ThemeMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,7 +13,8 @@ data class AccountState(
     val mobile: String? = null,
     val displayName: String? = null,
     val isSubscribed: Boolean = false,
-    val subscriptionTitle: String? = null
+    val subscriptionTitle: String? = null,
+    val subscriptionExpireAt: String? = null
 )
 
 /**
@@ -75,13 +77,15 @@ class SessionManager(context: Context) {
         mobile: String?,
         displayName: String?,
         isSubscribed: Boolean,
-        subscriptionTitle: String?
+        subscriptionTitle: String?,
+        subscriptionExpireAt: String?
     ) {
         prefs.edit()
             .putString(KEY_MOBILE, mobile)
             .putString(KEY_DISPLAY_NAME, displayName)
             .putBoolean(KEY_IS_SUBSCRIBED, isSubscribed)
             .putString(KEY_SUB_TITLE, subscriptionTitle)
+            .putString(KEY_SUB_EXPIRE, subscriptionExpireAt)
             .apply()
         publishAccount()
     }
@@ -101,6 +105,7 @@ class SessionManager(context: Context) {
             .remove(KEY_DISPLAY_NAME)
             .remove(KEY_IS_SUBSCRIBED)
             .remove(KEY_SUB_TITLE)
+            .remove(KEY_SUB_EXPIRE)
             .apply()
         publishAccount()
     }
@@ -109,12 +114,27 @@ class SessionManager(context: Context) {
         _account.value = readAccount()
     }
 
+    // ---------- حالت نمایش (تم) ----------
+
+    private val _themeMode = MutableStateFlow(readThemeMode())
+    val themeMode: StateFlow<ThemeMode> = _themeMode.asStateFlow()
+
+    fun setThemeMode(mode: ThemeMode) {
+        prefs.edit().putString(KEY_THEME_MODE, mode.name).apply()
+        _themeMode.value = mode
+    }
+
+    private fun readThemeMode(): ThemeMode =
+        runCatching { ThemeMode.valueOf(prefs.getString(KEY_THEME_MODE, null) ?: ThemeMode.SYSTEM.name) }
+            .getOrDefault(ThemeMode.SYSTEM)
+
     private fun readAccount() = AccountState(
         isLoggedIn = !token.isNullOrBlank(),
         mobile = prefs.getString(KEY_MOBILE, null),
         displayName = prefs.getString(KEY_DISPLAY_NAME, null),
         isSubscribed = prefs.getBoolean(KEY_IS_SUBSCRIBED, false),
-        subscriptionTitle = prefs.getString(KEY_SUB_TITLE, null)
+        subscriptionTitle = prefs.getString(KEY_SUB_TITLE, null),
+        subscriptionExpireAt = prefs.getString(KEY_SUB_EXPIRE, null)
     )
 
     private companion object {
@@ -125,5 +145,7 @@ class SessionManager(context: Context) {
         const val KEY_FREE_SEARCH_COUNT = "free_search_count"
         const val KEY_IS_SUBSCRIBED = "is_subscribed"
         const val KEY_SUB_TITLE = "subscription_title"
+        const val KEY_SUB_EXPIRE = "subscription_expire_at"
+        const val KEY_THEME_MODE = "theme_mode"
     }
 }

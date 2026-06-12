@@ -31,7 +31,21 @@ data class ProductDto(
     @SerializedName("price") val price: Long? = null,
     @SerializedName("type") val type: Int? = null,
     @SerializedName("uuid") val uuid: String? = null,
-    @SerializedName("descriptions") val descriptions: String? = null
+    @SerializedName("descriptions") val descriptions: String? = null,
+    @SerializedName("expires_at") val expiresAt: String? = null,
+    @SerializedName("expire_at") val expireAt: String? = null,
+    @SerializedName("pivot") val pivot: ProductPivot? = null
+) {
+    /** تاریخ انقضای اشتراکِ این کاربر؛ از pivot یا فیلدهای مستقیمِ محصول. */
+    val resolvedExpireAt: String?
+        get() = pivot?.expiresAt ?: pivot?.expireAt ?: expiresAt ?: expireAt
+}
+
+/** اطلاعات رابطه‌ی کاربر-محصول (شامل تاریخ انقضای خرید). */
+data class ProductPivot(
+    @SerializedName("expires_at") val expiresAt: String? = null,
+    @SerializedName("expire_at") val expireAt: String? = null,
+    @SerializedName("created_at") val createdAt: String? = null
 )
 
 /**
@@ -54,6 +68,9 @@ data class StatusDto(
 
     /** عنوان اشتراک جاری برای نمایش در نوار بالای اپ. */
     val subscriptionTitle: String? get() = products?.firstOrNull()?.title
+
+    /** تاریخ انقضای اشتراک جاری. */
+    val subscriptionExpireAt: String? get() = products?.firstOrNull()?.resolvedExpireAt
 
     val displayName: String? get() = fullName?.takeIf { it.isNotBlank() }
         ?: listOfNotNull(firstName, lastName).joinToString(" ").takeIf { it.isNotBlank() }

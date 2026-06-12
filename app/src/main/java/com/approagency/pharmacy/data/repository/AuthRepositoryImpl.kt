@@ -69,7 +69,8 @@ class AuthRepositoryImpl(
             mobile = dto.mobile ?: session.account.value.mobile,
             displayName = dto.displayName,
             isSubscribed = dto.isSubscribed,
-            subscriptionTitle = dto.subscriptionTitle
+            subscriptionTitle = dto.subscriptionTitle,
+            subscriptionExpireAt = dto.subscriptionExpireAt
         )
         return dto.isSubscribed
     }

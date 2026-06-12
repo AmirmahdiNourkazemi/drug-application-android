@@ -2,6 +2,7 @@ package com.approagency.pharmacy.presentation.account
 
 import android.app.Activity
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -29,6 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.approagency.pharmacy.domain.model.SubscriptionProduct
@@ -77,17 +79,20 @@ fun AccountSheet(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(Modifier.height(MaterialTheme.dime.lg))
-                        OutlinedTextField(
-                            value = viewModel.mobile,
-                            onValueChange = viewModel::updateMobile,
-                            label = { Text("شماره موبایل") },
-                            placeholder = { Text("09xxxxxxxxx") },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                            OutlinedTextField(
+                                value = viewModel.mobile,
+                                shape = MaterialTheme.shapes.large,
+                                onValueChange = { viewModel.updateMobile(it) },
+                                label = { Text("شماره موبایل" , textAlign = TextAlign.Right ) },
+                                placeholder = { Text("09xxxxxxxxx") },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                         Spacer(Modifier.height(MaterialTheme.dime.md))
-                        PrimaryButton(text = "ارسال کد", isLoading = ui.busy, onClick = viewModel::sendOtp)
+                        PrimaryButton(text = "ارسال کد", isLoading = ui.busy, onClick = { viewModel.sendOtp() })
                     }
 
                     AccountPhase.EnterOtp -> {
@@ -100,15 +105,15 @@ fun AccountSheet(
                         Spacer(Modifier.height(MaterialTheme.dime.lg))
                         OutlinedTextField(
                             value = viewModel.otp,
-                            onValueChange = viewModel::updateOtp,
+                            onValueChange = { viewModel.updateOtp(it) },
                             label = { Text("کد تأیید") },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.fillMaxWidth()
                         )
                         Spacer(Modifier.height(MaterialTheme.dime.md))
-                        PrimaryButton(text = "تأیید و ورود", isLoading = ui.busy, onClick = viewModel::verifyOtp)
-                        TextButton(onClick = viewModel::editMobile, enabled = !ui.busy) {
+                        PrimaryButton(text = "تأیید و ورود", isLoading = ui.busy, onClick = { viewModel.verifyOtp() })
+                        TextButton(onClick = { viewModel.editMobile() }, enabled = !ui.busy) {
                             Text("ویرایش شماره موبایل")
                         }
                     }
@@ -123,7 +128,9 @@ fun AccountSheet(
                         Spacer(Modifier.height(MaterialTheme.dime.lg))
                         when {
                             ui.productsLoading -> Loading(
-                                modifier = Modifier.fillMaxWidth().height(160.dp)
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(160.dp)
                             )
                             else -> Column(
                                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.dime.md)
@@ -156,7 +163,7 @@ fun AccountSheet(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(Modifier.height(MaterialTheme.dime.lg))
-                        TextButton(onClick = viewModel::logout) { Text("خروج از حساب") }
+                        TextButton(onClick = { viewModel.logout() }) { Text("خروج از حساب") }
                     }
                 }
 
