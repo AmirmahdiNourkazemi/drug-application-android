@@ -7,4 +7,6 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <!-- پس‌زمینه‌ی آیکن تطبیقی (هم‌رنگِ پس‌زمینه‌ی تصویر آیکن) -->
+    <color name="ic_launcher_bg">#016E70</color>
 </resources>
