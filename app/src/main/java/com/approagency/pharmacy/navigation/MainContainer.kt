@@ -21,8 +21,10 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
@@ -33,6 +35,7 @@ import com.approagency.pharmacy.domain.repository.AuthRepository
 import com.approagency.pharmacy.presentation.account.AccountDrawer
 import com.approagency.pharmacy.presentation.account.AccountSheet
 import com.approagency.pharmacy.presentation.account.AccountSheetController
+import com.approagency.pharmacy.presentation.common.ConfirmBottomSheet
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
@@ -52,6 +55,7 @@ fun MainContainer(
 
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    var showLogoutConfirm by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val appVersion = remember {
@@ -68,12 +72,7 @@ fun MainContainer(
                 appVersion = appVersion,
                 themeMode = themeMode,
                 onThemeModeChange = { session.setThemeMode(it) },
-                onLogout = {
-                    scope.launch {
-                        authRepository.logout()
-                        drawerState.close()
-                    }
-                }
+                onLogout = { showLogoutConfirm = true }
             )
         }
     ) {
@@ -95,6 +94,22 @@ fun MainContainer(
 
     if (sheetVisible) {
         AccountSheet(onDismiss = { sheetController.hide() })
+    }
+
+    if (showLogoutConfirm) {
+        ConfirmBottomSheet(
+            title = "خروج از حساب",
+            message = "آیا می‌خواهید از حساب کاربری خود خارج شوید؟",
+            confirmText = "خروج",
+            onConfirm = {
+                showLogoutConfirm = false
+                scope.launch {
+                    authRepository.logout()
+                    drawerState.close()
+                }
+            },
+            onDismiss = { showLogoutConfirm = false }
+        )
     }
 }
 
