@@ -1,13 +1,20 @@
 package com.approagency.pharmacy.di
 
 
+import com.approagency.pharmacy.data.billing.StubPurchaseGateway
+import com.approagency.pharmacy.data.local.SessionManager
 import com.approagency.pharmacy.data.local.database.LabDatabase
+import com.approagency.pharmacy.data.remote.ApproApiService
+import com.approagency.pharmacy.data.remote.AuthInterceptor
 import com.approagency.pharmacy.data.remote.DarooyabApiService
 import com.approagency.pharmacy.data.remote.DrugApiService
 import com.approagency.pharmacy.data.remote.DrugDetailParser
 import com.approagency.pharmacy.data.remote.DrugHtmlParser
+import com.approagency.pharmacy.data.repository.AuthRepositoryImpl
 import com.approagency.pharmacy.data.repository.DrugRepositoryImpl
 import com.approagency.pharmacy.data.repository.LabRepositoryImpl
+import com.approagency.pharmacy.domain.billing.PurchaseGateway
+import com.approagency.pharmacy.domain.repository.AuthRepository
 import com.approagency.pharmacy.domain.repository.DrugRepository
 import com.approagency.pharmacy.domain.usecase.DrugDetailYabUseCase
 import com.approagency.pharmacy.domain.usecase.GetDarmanUseCase
@@ -19,6 +26,8 @@ import com.approagency.pharmacy.domain.usecase.GetTestGroupUseCase
 import com.approagency.pharmacy.domain.usecase.GetTestItemByGroupId
 import com.approagency.pharmacy.domain.usecase.SearchDrugsYabUseCase
 import com.approagency.pharmacy.domain.usecase.SearchTestsUseCase
+import com.approagency.pharmacy.presentation.account.AccountSheetController
+import com.approagency.pharmacy.presentation.viewModel.AccountViewModel
 import com.approagency.pharmacy.presentation.viewModel.DrugDetailViewModel
 import com.approagency.pharmacy.presentation.viewModel.HomeViewModel
 import com.approagency.pharmacy.presentation.viewModel.LabViewModel
@@ -39,9 +48,13 @@ import java.net.CookiePolicy
 import java.util.concurrent.TimeUnit
 val jsonRetrofitQualifier = qualifier("jsonRetrofit")
 val scalarRetrofitQualifier = qualifier("scalarRetrofit")
+val authRetrofitQualifier = qualifier("authRetrofit")
 val appModule= module {
 
     single { LabDatabase.getInstance(androidContext()) }
+
+    // نشست کاربر روی دستگاه (توکن، موبایل، سهمیه‌ی جستجوی رایگان، وضعیت اشتراک)
+    single { SessionManager(androidContext()) }
 
     single { get<LabDatabase>().testGroupDao() }
     single { get<LabDatabase>().testItemDao() }
@@ -88,6 +101,35 @@ val appModule= module {
         val retrofit: Retrofit = get(scalarRetrofitQualifier)  // Get qualified instance
         retrofit.create(DarooyabApiService::class.java)
     }
+
+    // ========== Retrofit for APPROAGENCY auth/subscription backend ==========
+    // کلاینت مجزا با AuthInterceptor تا توکن فقط به این بک‌اند ارسال شود.
+    single<Retrofit>(authRetrofitQualifier) {
+        val authClient = OkHttpClient.Builder()
+            .addInterceptor(AuthInterceptor(get()))
+            .addInterceptor(HttpLoggingInterceptor().apply {
+                level = HttpLoggingInterceptor.Level.BODY
+            })
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .build()
+
+        Retrofit.Builder()
+            .baseUrl(Config.AUTH_BASE_URL)
+            .client(authClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    single<ApproApiService> {
+        val retrofit: Retrofit = get(authRetrofitQualifier)
+        retrofit.create(ApproApiService::class.java)
+    }
+
+    single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
+
+    // درگاه پرداخت: روی main استاب؛ شاخه‌های myket/bazar جایگزین می‌کنند.
+    single<PurchaseGateway> { StubPurchaseGateway() }
 
 
     factory { DrugHtmlParser() }
@@ -150,7 +192,14 @@ val appModule= module {
     }
 
     viewModel {
-        SearchViewModel(get())
+        SearchViewModel(get(), get(), get())
+    }
+
+    // کنترلر سراسری نمایش شیت حساب
+    single { AccountSheetController() }
+
+    viewModel {
+        AccountViewModel(get(), get(), get())
     }
     viewModel {
         PharmacyViewModel(get() , get ())
