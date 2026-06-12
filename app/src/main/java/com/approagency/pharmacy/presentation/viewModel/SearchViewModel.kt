@@ -94,8 +94,9 @@ class SearchViewModel(
                 allDrugs.addAll(searchResult.drugs)
                 isLoadingMore = false
 
-                // فقط یک «جستجوی جدیدِ» موفق از سهمیه‌ی رایگان کم می‌کند.
-                if (isNewSearch && !session.isSubscribed) {
+                // فقط وقتی جستجوی جدید نتیجه داشته باشد از سهمیه‌ی رایگان کم می‌کند؛
+                // اگر دارویی یافت نشود سهمیه دست‌نخورده می‌ماند.
+                if (isNewSearch && !session.isSubscribed && searchResult.drugs.isNotEmpty()) {
                     session.incrementFreeSearchCount()
                 }
 
