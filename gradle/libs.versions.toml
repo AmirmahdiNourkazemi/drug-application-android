@@ -14,6 +14,7 @@ okhttp = "4.12.0"
 gson = "2.13.1"
 coil = "2.7.0"
 location = "21.3.0"
+playServicesAuthApiPhone = "18.1.0"
 koinAndroid = "4.1.0"
 koinAndroidxCompose = "4.1.0"
 lifecycleViewmodelKtx = "2.9.4"
@@ -51,6 +52,7 @@ okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor",
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 location-services = { group = "com.google.android.gms", name = "play-services-location", version.ref = "location" }
+play-services-auth-api-phone = { group = "com.google.android.gms", name = "play-services-auth-api-phone", version.ref = "playServicesAuthApiPhone" }
 androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }

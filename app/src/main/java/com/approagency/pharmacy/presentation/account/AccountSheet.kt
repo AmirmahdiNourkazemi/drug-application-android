@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -33,14 +34,17 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.approagency.pharmacy.MainActivity
 import com.approagency.pharmacy.domain.model.SubscriptionProduct
 import com.approagency.pharmacy.presentation.common.CustomModalBottomSheet
 import com.approagency.pharmacy.presentation.common.Loading
+import com.approagency.pharmacy.presentation.common.OtpTextField
 import com.approagency.pharmacy.presentation.common.PrimaryButton
 import com.approagency.pharmacy.presentation.viewModel.AccountPhase
 import com.approagency.pharmacy.presentation.viewModel.AccountViewModel
 import com.vada.caller.ui.theme.dime
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,6 +55,7 @@ fun AccountSheet(
     val ui by viewModel.ui.collectAsState()
     val account by viewModel.account.collectAsState()
     val activity = LocalContext.current as? Activity
+    val otpAutoFillBus: OtpAutoFillBus = koinInject()
 
     LaunchedEffect(Unit) { viewModel.onSheetOpened() }
 
@@ -59,6 +64,22 @@ fun AccountSheet(
         if (ui.purchaseSuccess) {
             viewModel.consumePurchaseSuccess()
             onDismiss()
+        }
+    }
+
+    // در مرحله‌ی کد، گوش‌دادن به پیامک را آغاز کن و با خروج متوقفش کن.
+    val isOtpStep = ui.phase == AccountPhase.EnterOtp
+    DisposableEffect(isOtpStep) {
+        val mainActivity = activity as? MainActivity
+        if (isOtpStep) mainActivity?.startOtpAutofill()
+        onDispose { mainActivity?.stopOtpAutofill() }
+    }
+
+    // کدِ خوانده‌شده از پیامک را در فیلد بگذار و به‌صورت خودکار تأیید کن.
+    LaunchedEffect(Unit) {
+        otpAutoFillBus.codes.collect { code ->
+            viewModel.updateOtp(code)
+            viewModel.verifyOtp()
         }
     }
 
@@ -103,12 +124,11 @@ fun AccountSheet(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(Modifier.height(MaterialTheme.dime.lg))
-                        OutlinedTextField(
-                            value = viewModel.otp,
-                            onValueChange = { viewModel.updateOtp(it) },
-                            label = { Text("کد تأیید") },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        OtpTextField(
+                            otpText = viewModel.otp,
+                            otpCount = 5,
+                            onOtpTextChange = { value, _ -> viewModel.updateOtp(value) },
+                            onComplete = { viewModel.verifyOtp() },
                             modifier = Modifier.fillMaxWidth()
                         )
                         Spacer(Modifier.height(MaterialTheme.dime.md))

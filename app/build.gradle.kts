@@ -77,6 +77,9 @@ dependencies {
     // Location services
     implementation(libs.location.services)
 
+    // SMS User Consent API (OTP auto-fill)
+    implementation(libs.play.services.auth.api.phone)
+
     // Koin for DI
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose.v410)

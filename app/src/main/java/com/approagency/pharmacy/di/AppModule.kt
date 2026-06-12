@@ -27,6 +27,7 @@ import com.approagency.pharmacy.domain.usecase.GetTestItemByGroupId
 import com.approagency.pharmacy.domain.usecase.SearchDrugsYabUseCase
 import com.approagency.pharmacy.domain.usecase.SearchTestsUseCase
 import com.approagency.pharmacy.presentation.account.AccountSheetController
+import com.approagency.pharmacy.presentation.account.OtpAutoFillBus
 import com.approagency.pharmacy.presentation.viewModel.AccountViewModel
 import com.approagency.pharmacy.presentation.viewModel.DrugDetailViewModel
 import com.approagency.pharmacy.presentation.viewModel.HomeViewModel
@@ -197,6 +198,9 @@ val appModule= module {
 
     // کنترلر سراسری نمایش شیت حساب
     single { AccountSheetController() }
+
+    // پلِ تحویل کدِ خوانده‌شده از پیامک به شیت ورود
+    single { OtpAutoFillBus() }
 
     viewModel {
         AccountViewModel(get(), get(), get())

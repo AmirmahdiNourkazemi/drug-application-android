@@ -136,8 +136,12 @@ private fun AccountAppBar(
         },
         actions = {
             if (!account.isLoggedIn) {
-                TextButton(onClick = onAccountClick) {
+                ElevatedButton(onClick = onAccountClick) {
                     Text("ورود", textAlign = TextAlign.Center)
+                }
+            }else if (!account.isSubscribed){
+                ElevatedButton(onClick = onAccountClick) {
+                    Text("خرید اشتراک", textAlign = TextAlign.Center)
                 }
             }
         }

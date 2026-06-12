@@ -47,7 +47,7 @@ class AccountViewModel(
     }
 
     fun updateOtp(value: String) {
-        otp = value.filter { it.isDigit() }.take(6)
+        otp = value.filter { it.isDigit() }.take(OTP_LENGTH)
     }
 
     /** هنگام باز شدن شیت: فاز مناسب را بر اساس وضعیت حساب تعیین کن. */
@@ -169,6 +169,11 @@ class AccountViewModel(
 
     fun dismissError() {
         _ui.update { it.copy(error = null) }
+    }
+
+    private companion object {
+        /** طول کد یک‌بارمصرفِ سامانه‌ی آپرواجنسی. */
+        const val OTP_LENGTH = 5
     }
 }
 
