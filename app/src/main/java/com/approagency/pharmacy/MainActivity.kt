@@ -20,6 +20,7 @@ import com.approagency.pharmacy.data.local.SessionManager
 import com.approagency.pharmacy.domain.repository.AuthRepository
 import com.approagency.pharmacy.navigation.AppNavGraph
 import com.approagency.pharmacy.presentation.account.OtpAutoFillBus
+import com.approagency.pharmacy.presentation.account.OtpAutofillController
 import com.approagency.pharmacy.ui.theme.DrugTheme
 import com.google.android.gms.auth.api.phone.SmsRetriever
 import com.google.android.gms.common.api.CommonStatusCodes
@@ -27,7 +28,7 @@ import com.google.android.gms.common.api.Status
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
-class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity(), OtpAutofillController {
 
     private val session: SessionManager by inject()
     private val authRepository: AuthRepository by inject()
@@ -71,7 +72,7 @@ class MainActivity : ComponentActivity() {
     // ---------- خودکارپُرکُنِ کد پیامک (SMS User Consent API) ----------
 
     /** آغاز گوش‌دادن به پیامکِ کد؛ کدِ یافت‌شده از طریق [OtpAutoFillBus] تحویل می‌شود. */
-    fun startOtpAutofill() {
+    override fun startOtpAutofill() {
         SmsRetriever.getClient(this).startSmsUserConsent(null)
         if (otpSmsReceiver != null) return
         val receiver = object : BroadcastReceiver() {
@@ -103,7 +104,7 @@ class MainActivity : ComponentActivity() {
         )
     }
 
-    fun stopOtpAutofill() {
+    override fun stopOtpAutofill() {
         otpSmsReceiver?.let { runCatching { unregisterReceiver(it) } }
         otpSmsReceiver = null
     }

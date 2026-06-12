@@ -37,10 +37,8 @@ class DrugRepositoryImpl(
     override suspend fun drugDetail(cod: Int): Result<DrugModels> {
         return try {
             val response= apiService.getDrugDetail(cod = cod)
-            println(response.message)
             return Result.success(response)
         }catch (e: Exception){
-            println(e.message)
             Result.failure(e)
         }
     }
@@ -48,7 +46,6 @@ class DrugRepositoryImpl(
     override suspend fun getGorohDaroei(): Result<DarmanModel> {
         return  try {
              val response = apiService.getGorohDaroei()
-            println(response)
             return Result.success(response)
         }catch (e: Exception){
             Result.failure(e)
@@ -62,8 +59,6 @@ class DrugRepositoryImpl(
                     searchText = params.query ?: "",
                     pageNumber = params.pageNumber
                 )
-
-                println("HTML Response length: ${htmlResponse.length}")
 
                 val searchResult = parser.parseSearchResultsWithPagination(htmlResponse)
 

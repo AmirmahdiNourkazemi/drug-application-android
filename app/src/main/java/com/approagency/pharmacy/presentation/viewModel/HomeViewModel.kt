@@ -65,7 +65,6 @@ class HomeViewModel (
         viewModelScope.launch {
             try {
                 val result = getDrugSearchUseCase.invoke(drugSearchParams)
-                println(result)
                 _uiState.update { it.copy(
                     drugSearchState = it.drugSearchState.copy(
                         isLoading = false,
@@ -74,10 +73,8 @@ class HomeViewModel (
 
                 ) }
             } catch (e: Exception) {
-                println(e.message)
                 handleError(e.toUserMessage())
             }catch (e: Exception) {
-                println(e.message)
                 handleError(e.toUserMessage())
             }
         }
@@ -103,7 +100,6 @@ class HomeViewModel (
                         )
                     )
                 }
-                println(result)
             } catch (e: Exception) {
                 handleError(e.toUserMessage())
             }catch (e: Exception) {

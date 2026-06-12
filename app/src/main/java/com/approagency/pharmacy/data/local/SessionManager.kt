@@ -2,7 +2,7 @@ package com.approagency.pharmacy.data.local
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.approagency.pharmacy.ui.theme.ThemeMode
+import com.approagency.pharmacy.domain.model.ThemeMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

@@ -43,7 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.approagency.pharmacy.data.local.AccountState
-import com.approagency.pharmacy.ui.theme.ThemeMode
+import com.approagency.pharmacy.domain.model.ThemeMode
 import com.vada.caller.ui.theme.dime
 
 /**
