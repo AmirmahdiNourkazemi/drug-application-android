@@ -20,7 +20,7 @@ fun AppNavGraph() {
 
     NavHost(
         navController = navController,
-        startDestination = "home"
+        startDestination = "search"
     ) {
 
         // ───────────────

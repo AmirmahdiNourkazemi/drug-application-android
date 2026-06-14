@@ -3,8 +3,8 @@ package com.approagency.pharmacy.data.repository
 import com.approagency.pharmacy.data.dto.DarmanModel
 import com.approagency.pharmacy.data.dto.DrugListResponse
 import com.approagency.pharmacy.data.dto.DrugModels
+import com.approagency.pharmacy.data.local.LocalDrugDataSource
 import com.approagency.pharmacy.data.remote.DarooyabApiService
-import com.approagency.pharmacy.data.remote.DrugApiService
 import com.approagency.pharmacy.data.remote.DrugDetailParser
 import com.approagency.pharmacy.data.remote.DrugHtmlParser
 import com.approagency.pharmacy.data.remote.PharmacyHtmlParser
@@ -20,34 +20,39 @@ import kotlinx.coroutines.withContext
 import java.io.IOException
 
 class DrugRepositoryImpl(
-    private val apiService: DrugApiService,
     private val darooyabApiService: DarooyabApiService,
     private val parser: DrugHtmlParser,
     private val detailParser: DrugDetailParser,
+    private val localDrugDataSource: LocalDrugDataSource,
 ): DrugRepository {
+    // اطلاعات دارو همیشه از پایگاه‌دادهٔ محلیِ همراهِ اپ (assets/DrugStore.db) خوانده می‌شود.
     override suspend fun searchDrug(params: DrugSearchParams): Result<DrugListResponse> {
         return try {
-            val response = apiService.getDrugs(query = params.query , perPage = params.perPage , withRelations = params.withRelations , healGroup = params.healGroup , drugGroup = params.drugGroup )
-            return Result.success(response)
-        }catch (e: Exception){
+            Result.success(
+                localDrugDataSource.searchDrugs(
+                    query = params.query,
+                    drugGroup = params.drugGroup,
+                    healGroup = params.healGroup,
+                    perPage = params.perPage
+                )
+            )
+        } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
     override suspend fun drugDetail(cod: Int): Result<DrugModels> {
         return try {
-            val response= apiService.getDrugDetail(cod = cod)
-            return Result.success(response)
-        }catch (e: Exception){
+            Result.success(localDrugDataSource.drugDetail(cod))
+        } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
     override suspend fun getGorohDaroei(): Result<DarmanModel> {
-        return  try {
-             val response = apiService.getGorohDaroei()
-            return Result.success(response)
-        }catch (e: Exception){
+        return try {
+            Result.success(localDrugDataSource.darmanGroups())
+        } catch (e: Exception) {
             Result.failure(e)
         }
     }

@@ -2,12 +2,12 @@ package com.approagency.pharmacy.di
 
 
 import com.approagency.pharmacy.data.billing.StubPurchaseGateway
+import com.approagency.pharmacy.data.local.LocalDrugDataSource
 import com.approagency.pharmacy.data.local.SessionManager
 import com.approagency.pharmacy.data.local.database.LabDatabase
 import com.approagency.pharmacy.data.remote.ApproApiService
 import com.approagency.pharmacy.data.remote.AuthInterceptor
 import com.approagency.pharmacy.data.remote.DarooyabApiService
-import com.approagency.pharmacy.data.remote.DrugApiService
 import com.approagency.pharmacy.data.remote.DrugDetailParser
 import com.approagency.pharmacy.data.remote.DrugHtmlParser
 import com.approagency.pharmacy.data.repository.AuthRepositoryImpl
@@ -47,7 +47,6 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.net.CookieManager
 import java.net.CookiePolicy
 import java.util.concurrent.TimeUnit
-val jsonRetrofitQualifier = qualifier("jsonRetrofit")
 val scalarRetrofitQualifier = qualifier("scalarRetrofit")
 val authRetrofitQualifier = qualifier("authRetrofit")
 val appModule= module {
@@ -74,19 +73,6 @@ val appModule= module {
             .readTimeout(30, TimeUnit.SECONDS)
             .followRedirects(true)
             .build()
-    }
-
-    single<Retrofit>(jsonRetrofitQualifier) {  // Add qualifier
-        Retrofit.Builder()
-            .baseUrl(Config.BASE_URL)
-            .client(get<OkHttpClient>())
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    }
-
-    single<DrugApiService> {
-        val retrofit: Retrofit = get(jsonRetrofitQualifier)  // Get qualified instance
-        retrofit.create(DrugApiService::class.java)
     }
 
     // ========== Retrofit for DAROOYAB Website ==========
@@ -135,9 +121,12 @@ val appModule= module {
 
     factory { DrugHtmlParser() }
     factory { DrugDetailParser() }
+    // منبع آفلاین دارو (assets/DrugStore.db) برای fallback هنگام خطای شبکه
+    single { LocalDrugDataSource(androidContext()) }
+
     //repo
     single<DrugRepository> {
-        DrugRepositoryImpl(get<DrugApiService>() , get<DarooyabApiService>() , get() , get())
+        DrugRepositoryImpl(get<DarooyabApiService>() , get() , get() , get())
     }
 
 
